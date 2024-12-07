@@ -51,6 +51,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-br from-[#1A1F2C] to-[#2A2F3C] text-foreground min-h-screen;
+    @apply bg-gradient-to-br from-[#151821] via-[#1E2330] to-[#2A2F3C] text-foreground min-h-screen;
+    background-attachment: fixed;
   }
 }
