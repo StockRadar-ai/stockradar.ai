@@ -6,7 +6,7 @@ const Navbar = () => {
     <nav className="fixed w-full top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <img src="/lovable-uploads/89534923-4a0d-450e-8593-e1c8ce2568a3.png" alt="StockRadar Logo" className="h-8 w-8" />
+          <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="StockRadar Logo" className="h-8 w-8 object-contain" />
           <span className="text-xl font-semibold">StockRadar</span>
         </div>
         <div className="md:hidden">
