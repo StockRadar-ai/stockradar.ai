@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import MobileMenu from "./MobileMenu";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -31,7 +33,7 @@ const Navbar = () => {
             <a href="#contact" className="text-sm hover:text-primary transition-colors">Contact</a>
             <Button 
               className="bg-primary hover:bg-primary-hover hover-glow transition-all duration-300"
-              onClick={() => window.location.href = '/login'}
+              onClick={() => navigate('/login')}
             >
               Start Now
             </Button>

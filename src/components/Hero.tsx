@@ -1,7 +1,10 @@
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="pt-32 pb-20 px-4">
       <div className="container mx-auto text-center">
@@ -26,6 +29,7 @@ const Hero = () => {
 
         <Button 
           className="bg-primary hover:bg-primary-hover hover-glow transition-all duration-300 text-white px-8 py-6 text-lg"
+          onClick={() => navigate('/login')}
         >
           Start Now
         </Button>

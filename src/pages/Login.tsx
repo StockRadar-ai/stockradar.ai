@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { verifyKey } from "@/services/keyauth";
 
 const Login = () => {
   const [key, setKey] = useState("");
@@ -15,20 +16,22 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      // KeyAuth integration would go here
-      // For now, we'll simulate the login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Successfully logged in!");
-      navigate('/dashboard'); // You'll need to create a dashboard page
+      const result = await verifyKey(key);
+      if (result.success) {
+        toast.success(result.message);
+        navigate('/dashboard');
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
-      toast.error("Invalid license key");
+      toast.error("An error occurred during verification");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#151821] via-[#1E2330] to-[#2A2F3C]">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-[#0A0C10] to-[#151821]">
       <div className="flex items-center p-4 fixed w-full top-0 bg-black/60 backdrop-blur-lg">
         <a href="/" className="flex items-center space-x-2">
           <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="StockRadar Logo" className="h-8 w-8" />
@@ -54,7 +57,7 @@ const Login = () => {
               </div>
             </motion.div>
             <h2 className="text-2xl font-bold text-white mb-2">Login to Start</h2>
-            <p className="text-gray-400">with your first analysis!</p>
+            <p className="text-gray-400">Enter your license key to continue</p>
           </div>
 
           <motion.form 
@@ -67,7 +70,7 @@ const Login = () => {
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="Please enter your Key"
+                placeholder="Enter your license key"
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
                 className="bg-black/50 border-gray-800 focus:border-primary h-12"
@@ -79,7 +82,7 @@ const Login = () => {
               className="w-full bg-primary hover:bg-primary-hover h-12 hover-glow transition-all duration-300"
               disabled={isLoading}
             >
-              {isLoading ? "Verifying..." : "Continue"}
+              {isLoading ? "Verifying..." : "Login"}
             </Button>
           </motion.form>
         </div>
