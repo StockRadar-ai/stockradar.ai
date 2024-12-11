@@ -33,10 +33,15 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-[#0A0C10] to-[#151821]">
       <div className="flex items-center p-4 fixed w-full top-0 bg-black/60 backdrop-blur-lg">
-        <a href="/" className="flex items-center space-x-2">
+        <motion.a 
+          href="/" 
+          className="flex items-center space-x-2 hover-lift"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="StockRadar Logo" className="h-8 w-8" />
           <span className="text-xl font-semibold">StockRadar</span>
-        </a>
+        </motion.a>
       </div>
 
       <motion.div 
@@ -46,23 +51,22 @@ const Login = () => {
         className="flex-1 flex items-center justify-center p-4"
       >
         <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="Logo" className="w-10 h-10" />
-              </div>
-            </motion.div>
+          <motion.div 
+            className="text-center"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center hover-glow">
+              <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="Logo" className="w-10 h-10" />
+            </div>
             <h2 className="text-2xl font-bold text-white mb-2">Login to Start</h2>
             <p className="text-gray-400">Enter your license key to continue</p>
-          </div>
+          </motion.div>
 
           <motion.form 
             onSubmit={handleLogin}
-            className="mt-8 space-y-6"
+            className="mt-8 space-y-6 premium-card p-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
