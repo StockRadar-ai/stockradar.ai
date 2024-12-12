@@ -1,0 +1,36 @@
+@layer utilities {
+  .glow {
+    box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(255, 69, 0, 0.7);
+  }
+
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .tilt-effect {
+    transition: transform 0.3s ease;
+  }
+
+  .tilt-effect:hover {
+    transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
+  }
+
+  .premium-card {
+    @apply bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg;
+    transition: all 0.3s ease;
+  }
+
+  .premium-card:hover {
+    @apply border-primary/50 shadow-lg;
+    transform: translateY(-2px);
+  }
+}
