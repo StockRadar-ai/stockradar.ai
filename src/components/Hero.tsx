@@ -45,13 +45,13 @@ const Hero = () => {
             initial={{ opacity: 0, rotateY: -90 }}
             animate={{ opacity: 1, rotateY: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="relative"
+            className="relative md:-right-20 lg:-right-32"
           >
             <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-[100px] animate-pulse" />
             <img 
               src="/lovable-uploads/7025b423-122e-4cea-a5ac-b16c5a1943fe.png"
               alt="New York Stock Exchange"
-              className="rounded-3xl shadow-2xl relative z-10 w-full"
+              className="rounded-3xl shadow-2xl relative z-10 w-[120%] max-w-none"
             />
           </motion.div>
         </div>
