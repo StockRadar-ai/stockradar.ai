@@ -40,16 +40,16 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-[#0A0C10] to-[#151821]">
+    <div className="min-h-screen flex flex-col bg-[#141414]">
       <div className="flex items-center p-4 fixed w-full top-0 bg-black/60 backdrop-blur-lg">
         <motion.a 
           href="/" 
           className="flex items-center space-x-2"
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1 }}
           whileTap={{ scale: 0.95 }}
         >
           <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="StockRadar Logo" className="h-8 w-8" />
-          <span className="text-xl font-semibold">StockRadar</span>
+          <span className="text-xl font-semibold text-white">StockRadar</span>
         </motion.a>
       </div>
 
@@ -59,12 +59,14 @@ const Login = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
               className="text-center"
             >
               {verificationStatus === "verifying" && (
