@@ -4,7 +4,7 @@ interface KeyAuthResponse {
   error?: string;
 }
 
-const KEYAUTH_API_URL = "https://cbf1-2a01-41e3-2af6-f600-a553-be3f-1918-235e.ngrok-free.app/api/auth/verify-key";
+const KEYAUTH_API_URL = "https://38de-2a01-41e3-2af6-f600-a553-be3f-1918-235e.ngrok-free.app/api/auth/verify-key";
 
 export const verifyKey = async (key: string): Promise<KeyAuthResponse> => {
   try {
@@ -17,7 +17,7 @@ export const verifyKey = async (key: string): Promise<KeyAuthResponse> => {
     });
 
     if (!response.ok) {
-      throw new Error("Network response was not ok");
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
@@ -29,7 +29,9 @@ export const verifyKey = async (key: string): Promise<KeyAuthResponse> => {
     console.error("Error validating license key:", error);
     return {
       success: false,
-      message: "Failed to connect to authentication server",
+      message: error instanceof Error && error.message === "Failed to fetch" 
+        ? "Unable to connect to authentication server. Please try again later."
+        : "Failed to validate license key. Please try again.",
     };
   }
 };
