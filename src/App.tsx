@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { AnimatePresence, motion } from "framer-motion";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Legal from "./pages/Legal";
 
@@ -26,6 +27,7 @@ const AnimatedRoutes = () => {
         <Routes location={location}>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/legal/:type" element={<Legal />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

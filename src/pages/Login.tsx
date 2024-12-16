@@ -21,6 +21,7 @@ const Login = () => {
       const result = await verifyKey(key);
       if (result.success) {
         setVerificationStatus("success");
+        localStorage.setItem("licenseKey", key);
         await new Promise(resolve => setTimeout(resolve, 1500));
         toast.success(result.message);
         navigate('/dashboard');
