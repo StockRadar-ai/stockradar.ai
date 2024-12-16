@@ -51,7 +51,7 @@ const Dashboard = () => {
             className="hover:bg-gray-800/50"
             onClick={() => toast({
               title: "License Key",
-              description: `Your key: ${key}`,
+              description: <div className="font-mono blur-sm hover:blur-none transition-all duration-300">{key}</div>,
             })}
           >
             <Settings className="h-5 w-5" />
@@ -60,14 +60,14 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pt-24 pb-16">
+      <div className="container mx-auto px-4 pt-32 pb-16">
         <AnimatePresence>
           {showGreeting && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mb-12"
+              className="text-center mb-16"
             >
               <h1 className="text-3xl font-bold mb-2">Hi there!</h1>
               <p className="text-gray-400">Can I help you with anything?</p>
@@ -76,32 +76,41 @@ const Dashboard = () => {
         </AnimatePresence>
 
         {/* Options Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <DashboardOption
-            title="Stocks of the Week"
-            description="Get this week's top stock picks"
-            onClick={() => handleOptionClick("Stocks of the Week")}
-            isSelected={selectedOption === "Stocks of the Week"}
-          />
-          <DashboardOption
-            title="Stock Analysis"
-            description="Analyze any stock in detail"
-            onClick={() => handleOptionClick("Stock Analysis")}
-            isSelected={selectedOption === "Stock Analysis"}
-          />
-          <DashboardOption
-            title="Chart Explanation"
-            description="Understand chart patterns"
-            onClick={() => handleOptionClick("Chart Explanation")}
-            isSelected={selectedOption === "Chart Explanation"}
-          />
-          <DashboardOption
-            title="Strategy Builder"
-            description="Create custom trading strategies"
-            onClick={() => handleOptionClick("Strategy Builder")}
-            isSelected={selectedOption === "Strategy Builder"}
-          />
-        </div>
+        <AnimatePresence>
+          {!showChat && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+            >
+              <DashboardOption
+                title="Stocks of the Week"
+                description="Get this week's top stock picks"
+                onClick={() => handleOptionClick("Stocks of the Week")}
+                isSelected={selectedOption === "Stocks of the Week"}
+              />
+              <DashboardOption
+                title="Stock Analysis"
+                description="Analyze any stock in detail"
+                onClick={() => handleOptionClick("Stock Analysis")}
+                isSelected={selectedOption === "Stock Analysis"}
+              />
+              <DashboardOption
+                title="Chart Explanation"
+                description="Understand chart patterns"
+                onClick={() => handleOptionClick("Chart Explanation")}
+                isSelected={selectedOption === "Chart Explanation"}
+              />
+              <DashboardOption
+                title="Strategy Builder"
+                description="Create custom trading strategies"
+                onClick={() => handleOptionClick("Strategy Builder")}
+                isSelected={selectedOption === "Strategy Builder"}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Chat Interface */}
         <AnimatePresence>
@@ -125,7 +134,7 @@ const Dashboard = () => {
         >
           <Button
             variant="outline"
-            className="bg-black/40 border-gray-800 hover:bg-gray-800/50"
+            className="bg-black/40 backdrop-blur-md border-gray-800 hover:bg-gray-800/50"
             onClick={() => setShowSavedChats(true)}
           >
             <MessageSquare className="mr-2 h-4 w-4" />

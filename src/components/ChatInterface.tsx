@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { X, Send } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
@@ -72,8 +72,11 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
 
         <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
           {messages.map((msg, idx) => (
-            <div
+            <motion.div
               key={idx}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
               className={`p-3 rounded-lg ${
                 msg.role === 'user' 
                   ? 'bg-primary/20 ml-auto max-w-[80%]' 
@@ -81,16 +84,20 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
               }`}
             >
               {msg.content}
-            </div>
+            </motion.div>
           ))}
           {isLoading && (
-            <div className="bg-gray-800/50 p-3 rounded-lg mr-auto max-w-[80%]">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-gray-800/50 p-3 rounded-lg mr-auto max-w-[80%]"
+            >
               <div className="flex space-x-2">
                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100" />
                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200" />
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
 
@@ -101,8 +108,12 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
             placeholder={`Enter your ${option.toLowerCase()} query...`}
             className="bg-black/40 border-gray-800"
           />
-          <Button type="submit" disabled={isLoading}>
-            <Send className="h-4 w-4" />
+          <Button 
+            type="submit" 
+            disabled={isLoading}
+            className="rounded-full aspect-square p-2"
+          >
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </form>
       </div>

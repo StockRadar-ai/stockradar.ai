@@ -31,7 +31,7 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-black/40 border border-gray-800/50 rounded-lg p-4"
+              className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-4"
             >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">{chat.option}</h3>

@@ -18,6 +18,7 @@ const DashboardOption = ({ title, description, onClick, isSelected }: DashboardO
         bg-black/40 backdrop-blur-lg
         border border-gray-800/50
         transition-all duration-300
+        hover:shadow-lg hover:shadow-primary/5
         ${isSelected ? 'border-primary shadow-lg shadow-primary/20' : 'hover:border-gray-700'}
       `}
     >
