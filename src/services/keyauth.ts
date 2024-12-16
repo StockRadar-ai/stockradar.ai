@@ -1,11 +1,10 @@
 interface KeyAuthResponse {
   success: boolean;
   message?: string;
-  duration?: string;
   error?: string;
 }
 
-const KEYAUTH_API_URL = "https://98f7-2a01-41e3-2b3a-ca00-a553-be3f-1918-235e.ngrok-free.app/api/auth/verify-key";
+const KEYAUTH_API_URL = "https://5b1e-2a01-41e3-2b3a-ca00-a553-be3f-1918-235e.ngrok-free.app/api/auth/verify-key";
 
 export const verifyKey = async (key: string): Promise<KeyAuthResponse> => {
   if (!key) {
@@ -37,7 +36,6 @@ export const verifyKey = async (key: string): Promise<KeyAuthResponse> => {
     return {
       success: data.success,
       message: data.message,
-      duration: data.duration,
       error: data.error
     };
   } catch (error) {
