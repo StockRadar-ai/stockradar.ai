@@ -5,7 +5,7 @@ interface KeyAuthResponse {
   error?: string;
 }
 
-const KEYAUTH_API_URL = "https://2266-2a01-41e3-2b3a-ca00-a553-be3f-1918-235e.ngrok-free.app/api/auth/verify-key";
+const KEYAUTH_API_URL = "https://98f7-2a01-41e3-2b3a-ca00-a553-be3f-1918-235e.ngrok-free.app/api/auth/verify-key";
 
 export const verifyKey = async (key: string): Promise<KeyAuthResponse> => {
   if (!key) {
