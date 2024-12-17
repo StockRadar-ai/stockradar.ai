@@ -1,7 +1,11 @@
 import { Check } from "lucide-react";
 import { Button } from "./ui/button";
+import { useState } from "react";
+import PaymentDialog from "./PaymentDialog";
 
 const Pricing = () => {
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  
   const features = [
     "High Quality Analysis",
     "Professional & Data Backed",
@@ -37,13 +41,18 @@ const Pricing = () => {
             </ul>
             <Button 
               className="w-full bg-primary hover:bg-primary-hover hover-glow transition-all duration-300"
-              onClick={() => window.location.href = '/login'}
+              onClick={() => setShowPaymentDialog(true)}
             >
               Get Started
             </Button>
           </div>
         </div>
       </div>
+
+      <PaymentDialog 
+        open={showPaymentDialog} 
+        onOpenChange={setShowPaymentDialog}
+      />
     </section>
   );
 };
