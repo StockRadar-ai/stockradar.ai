@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardOption from "@/components/DashboardOption";
 import ChatInterface from "@/components/ChatInterface";
 import SavedChats from "@/components/SavedChats";
+import SettingsModal from "@/components/Settings";
 import { useToast } from "@/components/ui/use-toast";
 import { UsageTracker } from "@/components/UsageTracker";
 
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [showSavedChats, setShowSavedChats] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const key = localStorage.getItem("licenseKey");
@@ -50,10 +52,7 @@ const Dashboard = () => {
             variant="ghost" 
             size="icon"
             className="hover:bg-gray-800/50"
-            onClick={() => toast({
-              title: "License Key",
-              description: <div className="font-mono blur-sm hover:blur-none transition-all duration-300">{key}</div>,
-            })}
+            onClick={() => setShowSettings(true)}
           >
             <Settings className="h-5 w-5" />
           </Button>
@@ -162,6 +161,16 @@ const Dashboard = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <SettingsModal 
+            onClose={() => setShowSettings(false)}
+            licenseKey={key || ''}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
