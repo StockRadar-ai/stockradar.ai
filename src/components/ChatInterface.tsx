@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { UsageTracker, MAX_USES } from "./UsageTracker";
 
 interface ChatInterfaceProps {
   option: string;
@@ -15,10 +16,25 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const usageTrackerRef = useRef<{ incrementUse: () => boolean }>();
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
+
+    // Check usage limit
+    if (!usageTrackerRef.current?.incrementUse()) {
+      return;
+    }
 
     const userMessage = input.trim();
     setInput("");
@@ -60,7 +76,7 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4"
+      className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4 z-50"
     >
       <div className="container mx-auto max-w-4xl">
         <div className="flex justify-between items-center mb-4">
@@ -99,6 +115,7 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
               </div>
             </motion.div>
           )}
+          <div ref={messagesEndRef} />
         </div>
 
         <form onSubmit={handleSubmit} className="flex gap-2">

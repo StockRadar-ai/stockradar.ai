@@ -7,6 +7,7 @@ import DashboardOption from "@/components/DashboardOption";
 import ChatInterface from "@/components/ChatInterface";
 import SavedChats from "@/components/SavedChats";
 import { useToast } from "@/components/ui/use-toast";
+import { UsageTracker } from "@/components/UsageTracker";
 
 const Dashboard = () => {
   const [showGreeting, setShowGreeting] = useState(true);
@@ -59,6 +60,9 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
+      {/* Usage Tracker */}
+      <UsageTracker />
+
       {/* Main Content */}
       <div className="container mx-auto px-4 pt-32 pb-16">
         <AnimatePresence>
@@ -82,7 +86,7 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-16"
             >
               <DashboardOption
                 title="Stocks of the Week"
