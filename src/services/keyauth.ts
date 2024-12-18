@@ -4,7 +4,7 @@ interface KeyAuthResponse {
   error?: string;
 }
 
-const KEYAUTH_API_URL = "https://f667-2a01-41e3-2bd3-a100-f85b-46e6-96d4-378b.ngrok-free.app";
+const KEYAUTH_API_URL = "https://f667-2a01-41e3-2bd3-a100-f85b-46e6-96d4-378b.ngrok-free.app/api/auth/verify-key";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
 
