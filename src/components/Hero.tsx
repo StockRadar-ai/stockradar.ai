@@ -15,13 +15,13 @@ const Hero = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="inline-flex items-center bg-primary/10 rounded-full px-4 py-1.5 mb-8">
-              <span className="w-2 h-2 rounded-full bg-primary mr-2"></span>
-              <span className="text-sm font-medium text-primary">
+              <span className="w-2 h-2 rounded-full bg-[#FF4500] mr-2"></span>
+              <span className="text-sm font-medium text-[#FF4500]">
                 Supercharge Your Portfolio with AI
               </span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
+            <h1 className="text-4xl md:text-6xl font-light mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
               When Money Talks,
               <br />
               We Translate
