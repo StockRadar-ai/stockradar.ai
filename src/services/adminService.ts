@@ -11,86 +11,48 @@ export interface UserData {
 }
 
 export const fetchUsers = async (): Promise<UserData[]> => {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.session?.access_token) throw new Error('Not authenticated');
-
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-operations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${session.session.access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ action: 'getAnalytics' })
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch users');
-  }
-
-  const data = await response.json();
-  return data.users;
+  const { data, error } = await supabase
+    .from('user_analytics')
+    .select('*');
+  
+  if (error) throw error;
+  return data || [];
 };
 
 export const updateUserSubscription = async (userId: string, subscription: string) => {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.session?.access_token) throw new Error('Not authenticated');
-
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-operations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${session.session.access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'updateUser',
-      userId,
-      data: { subscription }
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to update user subscription');
-  }
+  const { error } = await supabase
+    .from('user_analytics')
+    .update({ subscription })
+    .eq('user_id', userId);
+  
+  if (error) throw error;
 };
 
 export const banUser = async (userId: string, banned: boolean) => {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.session?.access_token) throw new Error('Not authenticated');
-
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-operations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${session.session.access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      action: 'updateUser',
-      userId,
-      data: { status: banned ? 'Banned' : 'Active' }
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to update user status');
-  }
+  const { error } = await supabase
+    .from('user_analytics')
+    .update({ status: banned ? 'Banned' : 'Active' })
+    .eq('user_id', userId);
+  
+  if (error) throw error;
 };
 
 export const getAnalytics = async () => {
-  const { data: session } = await supabase.auth.getSession();
-  if (!session?.session?.access_token) throw new Error('Not authenticated');
-
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-operations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${session.session.access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ action: 'getAnalytics' })
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch analytics');
-  }
-
-  return response.json();
+  const { data, error } = await supabase
+    .from('user_analytics')
+    .select('*');
+  
+  if (error) throw error;
+  
+  const users = data || [];
+  return {
+    totalUsers: users.length,
+    premiumUsers: users.filter(u => u.subscription === 'Premium').length,
+    basicUsers: users.filter(u => u.subscription === 'Basic').length,
+    totalRequests: users.reduce((acc, u) => acc + (u.requests || 0), 0),
+    averageRequests: users.length > 0 
+      ? users.reduce((acc, u) => acc + (u.requests || 0), 0) / users.length 
+      : 0,
+    users
+  };
 };
