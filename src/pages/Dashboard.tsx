@@ -18,14 +18,6 @@ const Dashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const key = localStorage.getItem("licenseKey");
-
-  useEffect(() => {
-    if (!key) {
-      navigate("/login");
-      return;
-    }
-  }, [key, navigate]);
 
   const handleOptionClick = (option: string) => {
     setShowGreeting(false);
@@ -167,7 +159,6 @@ const Dashboard = () => {
         {showSettings && (
           <SettingsModal 
             onClose={() => setShowSettings(false)}
-            licenseKey={key || ''}
           />
         )}
       </AnimatePresence>
