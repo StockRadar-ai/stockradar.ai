@@ -4,13 +4,15 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
-import { loginWithEmailAndPassword } from "@/services/firebase";
+import { loginWithEmailAndPassword, auth } from "@/services/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState<"idle" | "authenticating" | "success" | "error">("idle");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -37,6 +39,22 @@ const Login = () => {
     } finally {
       setIsLoading(false);
       setAuthStatus("idle");
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("Password reset email sent! Please check your inbox.");
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reset email");
     }
   };
 
@@ -88,7 +106,7 @@ const Login = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="flex-1 flex items-center justify-center p-4"
+        className="flex-1 flex items-center justify-center p-4 mt-16"
       >
         <div className="w-full max-w-md space-y-8">
           <motion.div 
@@ -105,7 +123,7 @@ const Login = () => {
           </motion.div>
 
           <motion.form 
-            onSubmit={handleLogin}
+            onSubmit={showForgotPassword ? handleForgotPassword : handleLogin}
             className="mt-8 space-y-6 bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -120,14 +138,16 @@ const Login = () => {
                 className="bg-black/50 border-gray-800 focus:border-primary h-12"
                 required
               />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-black/50 border-gray-800 focus:border-primary h-12"
-                required
-              />
+              {!showForgotPassword && (
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-black/50 border-gray-800 focus:border-primary h-12"
+                  required
+                />
+              )}
             </div>
 
             <Button
@@ -135,13 +155,22 @@ const Login = () => {
               className="w-full bg-primary hover:bg-primary-hover h-12 transition-all duration-300"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Please wait..." : (showForgotPassword ? "Reset Password" : "Sign in")}
             </Button>
 
-            <div className="text-center mt-4">
+            <div className="text-center mt-4 space-y-2">
+              <motion.button
+                type="button"
+                onClick={() => setShowForgotPassword(!showForgotPassword)}
+                className="text-sm text-primary hover:text-primary/80 transition-colors"
+                whileHover={{ scale: 1.05 }}
+              >
+                {showForgotPassword ? "Back to Login" : "Forgot Password?"}
+              </motion.button>
+              
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="text-sm"
+                className="text-sm block"
               >
                 <Link to="/signup" className="text-primary hover:text-primary/80 transition-colors">
                   Don't have an account? Sign up

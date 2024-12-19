@@ -33,9 +33,10 @@ const Settings = ({ onClose }: SettingsProps) => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+        className="absolute top-16 right-4 z-50
                    bg-black/80 backdrop-blur-lg border border-gray-800/50 
-                   rounded-lg p-6 w-[90%] max-w-md z-50"
+                   rounded-lg p-6 w-[90%] max-w-[300px]
+                   shadow-xl"
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Settings</h3>
