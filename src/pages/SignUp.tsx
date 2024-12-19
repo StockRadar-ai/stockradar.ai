@@ -4,36 +4,36 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
-import { loginWithEmailAndPassword } from "@/services/firebase";
+import { signUpWithEmailAndPassword } from "@/services/firebase";
 
-const Login = () => {
+const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [authStatus, setAuthStatus] = useState<"idle" | "authenticating" | "success" | "error">("idle");
+  const [authStatus, setAuthStatus] = useState<"idle" | "registering" | "success" | "error">("idle");
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setAuthStatus("authenticating");
+    setAuthStatus("registering");
 
     try {
-      const result = await loginWithEmailAndPassword(email, password);
+      const result = await signUpWithEmailAndPassword(email, password);
       if (result.success) {
         setAuthStatus("success");
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.success("Successfully logged in!");
+        toast.success("Account created successfully!");
         navigate('/dashboard');
       } else {
         setAuthStatus("error");
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.error(result.error || "Failed to login");
+        toast.error(result.error || "Failed to create account");
       }
     } catch (error) {
       setAuthStatus("error");
       await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.error("An error occurred during login");
+      toast.error("An error occurred during registration");
     } finally {
       setIsLoading(false);
       setAuthStatus("idle");
@@ -70,14 +70,14 @@ const Login = () => {
               transition={{ duration: 0.3 }}
               className="text-center"
             >
-              {authStatus === "authenticating" && (
-                <div className="text-2xl text-white">Authenticating...</div>
+              {authStatus === "registering" && (
+                <div className="text-2xl text-white">Creating account...</div>
               )}
               {authStatus === "success" && (
-                <div className="text-2xl text-green-500">Login Successful!</div>
+                <div className="text-2xl text-green-500">Account Created!</div>
               )}
               {authStatus === "error" && (
-                <div className="text-2xl text-red-500">Login Failed!</div>
+                <div className="text-2xl text-red-500">Registration Failed!</div>
               )}
             </motion.div>
           </motion.div>
@@ -100,12 +100,12 @@ const Login = () => {
             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
               <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="Logo" className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-            <p className="text-gray-400">Sign in to your account</p>
+            <h2 className="text-2xl font-bold text-white mb-2">Create Account</h2>
+            <p className="text-gray-400">Join StockRadar today</p>
           </motion.div>
 
           <motion.form 
-            onSubmit={handleLogin}
+            onSubmit={handleSignUp}
             className="mt-8 space-y-6 bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -135,7 +135,7 @@ const Login = () => {
               className="w-full bg-primary hover:bg-primary-hover h-12 transition-all duration-300"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Creating account..." : "Sign up"}
             </Button>
 
             <div className="text-center mt-4">
@@ -143,8 +143,8 @@ const Login = () => {
                 whileHover={{ scale: 1.05 }}
                 className="text-sm"
               >
-                <Link to="/signup" className="text-primary hover:text-primary/80 transition-colors">
-                  Don't have an account? Sign up
+                <Link to="/login" className="text-primary hover:text-primary/80 transition-colors">
+                  Already have an account? Sign in
                 </Link>
               </motion.div>
             </div>
@@ -155,4 +155,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignUp;
