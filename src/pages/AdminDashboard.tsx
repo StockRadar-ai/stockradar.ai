@@ -25,44 +25,48 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Ban, UserPlus, Shield, Activity } from "lucide-react";
+import { fetchUsers, updateUserSubscription, banUser, getAnalytics, UserData } from "@/services/adminService";
 
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [analytics, setAnalytics] = useState({
+    totalUsers: 0,
+    premiumUsers: 0,
+    basicUsers: 0,
+    totalRequests: 0,
+    averageRequests: 0
+  });
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
-  // Mock data - In a real app, this would come from your backend
-  const mockUsers = [
-    { id: 1, email: "user1@example.com", subscription: "Premium", status: "Active", requests: 23 },
-    { id: 2, email: "user2@example.com", subscription: "Basic", status: "Banned", requests: 5 },
-    { id: 3, email: "user3@example.com", subscription: "Premium", status: "Active", requests: 45 },
-  ];
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated]);
 
-  const pieData = [
-    { name: "Premium Users", value: 63 },
-    { name: "Basic Users", value: 37 },
-  ];
-
-  const activityData = [
-    { name: "Mon", requests: 24 },
-    { name: "Tue", requests: 35 },
-    { name: "Wed", requests: 42 },
-    { name: "Thu", requests: 38 },
-    { name: "Fri", requests: 45 },
-    { name: "Sat", requests: 32 },
-    { name: "Sun", requests: 28 },
-  ];
-
-  const COLORS = ["#FF4500", "#FF6A33"];
+  const loadData = async () => {
+    try {
+      const [usersData, analyticsData] = await Promise.all([
+        fetchUsers(),
+        getAnalytics()
+      ]);
+      setUsers(usersData);
+      setAnalytics(analyticsData);
+    } catch (error) {
+      toast.error("Failed to load data");
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Hardcoded credentials check
       if (username === "admin" && password === "PH@X@swi-1@lCrL49GO#") {
         setIsAuthenticated(true);
         toast.success("Successfully logged in as admin!");
@@ -75,6 +79,37 @@ const AdminDashboard = () => {
       setIsLoading(false);
     }
   };
+
+  const handleBanUser = async (userId: string, currentStatus: string) => {
+    try {
+      await banUser(userId, currentStatus === 'Active');
+      toast.success("User status updated successfully");
+      loadData();
+    } catch (error) {
+      toast.error("Failed to update user status");
+    }
+  };
+
+  const handleUpdateSubscription = async (userId: string, newSubscription: string) => {
+    try {
+      await updateUserSubscription(userId, newSubscription);
+      toast.success("Subscription updated successfully");
+      loadData();
+    } catch (error) {
+      toast.error("Failed to update subscription");
+    }
+  };
+
+  const filteredUsers = users.filter(user => 
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const pieData = [
+    { name: "Premium Users", value: analytics.premiumUsers },
+    { name: "Basic Users", value: analytics.basicUsers },
+  ];
+
+  const COLORS = ["#FF4500", "#FF6A33"];
 
   if (!isAuthenticated) {
     return (
@@ -148,50 +183,24 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Total Users</h3>
-            <p className="text-4xl font-bold text-primary">1,234</p>
-            <p className="text-gray-400 mt-2">+12% from last month</p>
+            <p className="text-4xl font-bold text-primary">{analytics.totalUsers}</p>
+            <p className="text-gray-400 mt-2">Active users in the platform</p>
           </div>
           
           <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Active Subscriptions</h3>
-            <p className="text-4xl font-bold text-primary">856</p>
-            <p className="text-gray-400 mt-2">+8% from last month</p>
+            <h3 className="text-lg font-semibold mb-4">Premium Subscriptions</h3>
+            <p className="text-4xl font-bold text-primary">{analytics.premiumUsers}</p>
+            <p className="text-gray-400 mt-2">Active premium users</p>
           </div>
           
           <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">Total Requests</h3>
-            <p className="text-4xl font-bold text-primary">45,678</p>
-            <p className="text-gray-400 mt-2">+15% from last month</p>
+            <p className="text-4xl font-bold text-primary">{analytics.totalRequests}</p>
+            <p className="text-gray-400 mt-2">Average: {analytics.averageRequests.toFixed(1)} per user</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">Weekly Activity</h3>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={activityData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                  <XAxis dataKey="name" stroke="#666" />
-                  <YAxis stroke="#666" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#000', 
-                      border: '1px solid #333',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="requests" 
-                    stroke="#FF4500" 
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
           <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
             <h3 className="text-lg font-semibold mb-4">User Distribution</h3>
             <div className="h-[300px]">
@@ -222,21 +231,51 @@ const AdminDashboard = () => {
               </ResponsiveContainer>
             </div>
           </div>
+
+          <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={users.slice(-7)}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                  <XAxis 
+                    dataKey="email" 
+                    stroke="#666"
+                    tick={{ fontSize: 12 }}
+                    angle={-45}
+                    textAnchor="end"
+                  />
+                  <YAxis stroke="#666" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#000', 
+                      border: '1px solid #333',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="requests" 
+                    stroke="#FF4500" 
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
 
         <div className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold">User Management</h3>
             <div className="flex space-x-4">
-              <Button variant="outline" className="border-gray-700 hover:bg-gray-800">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add User
-              </Button>
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 bg-black/50 border-gray-700 focus:border-primary"
                 />
               </div>
@@ -255,10 +294,19 @@ const AdminDashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockUsers.map((user) => (
+                {filteredUsers.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.subscription}</TableCell>
+                    <TableCell>
+                      <select
+                        value={user.subscription}
+                        onChange={(e) => handleUpdateSubscription(user.id, e.target.value)}
+                        className="bg-black/50 border border-gray-700 rounded px-2 py-1"
+                      >
+                        <option value="Basic">Basic</option>
+                        <option value="Premium">Premium</option>
+                      </select>
+                    </TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         user.status === 'Active' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
@@ -269,10 +317,12 @@ const AdminDashboard = () => {
                     <TableCell>{user.requests}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm" className="border-gray-700 hover:bg-gray-800">
-                          <Activity className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="border-gray-700 hover:bg-gray-800">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-gray-700 hover:bg-gray-800"
+                          onClick={() => handleBanUser(user.id, user.status)}
+                        >
                           <Ban className="w-4 h-4" />
                         </Button>
                       </div>
