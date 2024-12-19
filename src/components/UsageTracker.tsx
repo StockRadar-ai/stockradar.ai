@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { auth } from "@/services/firebase";
+import { supabase } from "@/integrations/supabase/client";
 
 const MAX_USES = 5;
 
@@ -12,7 +13,7 @@ const UsageTracker = () => {
   const { toast } = useToast();
   
   useEffect(() => {
-    const checkSubscription = async () => {
+    const checkSubscriptionAndUsage = async () => {
       try {
         const user = auth.currentUser;
         if (!user) {
@@ -20,46 +21,26 @@ const UsageTracker = () => {
           return;
         }
 
-        const token = await user.getIdToken();
-        const response = await fetch('https://0068-2a01-41e3-2bd3-a100-f85b-46e6-96d4-378b.ngrok-free.app/api/auth/check-subscription', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          }
-        });
+        const { data, error } = await supabase
+          .from('user_analytics')
+          .select('subscription, requests')
+          .eq('user_id', user.uid)
+          .single();
 
-        if (!response.ok) {
-          throw new Error('Failed to check subscription');
+        if (error) {
+          console.error('Error fetching user analytics:', error);
+          return;
         }
 
-        const data = await response.json();
-        setIsSubscribed(data.subscribed);
+        setIsSubscribed(data?.subscription === 'Premium');
+        setUses(data?.requests || 0);
       } catch (error) {
-        console.error('Error checking subscription:', error);
+        console.error('Error checking subscription and usage:', error);
       }
     };
 
-    checkSubscription();
+    checkSubscriptionAndUsage();
   }, []);
-
-  useEffect(() => {
-    if (!isSubscribed) return;
-
-    // Load uses from localStorage
-    const lastReset = localStorage.getItem('lastUsageReset');
-    const currentUses = localStorage.getItem('currentUses');
-    
-    const now = new Date();
-    const today = now.toDateString();
-    
-    if (lastReset !== today) {
-      // Reset uses at midnight
-      localStorage.setItem('lastUsageReset', today);
-      localStorage.setItem('currentUses', '0');
-      setUses(0);
-    } else if (currentUses) {
-      setUses(parseInt(currentUses));
-    }
-  }, [isSubscribed]);
 
   if (!isSubscribed) return null;
 
