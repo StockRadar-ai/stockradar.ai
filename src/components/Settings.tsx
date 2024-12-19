@@ -1,15 +1,31 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { auth } from "@/services/firebase";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SettingsProps {
   onClose: () => void;
-  licenseKey: string;
 }
 
-const Settings = ({ onClose, licenseKey }: SettingsProps) => {
-  const [isKeyVisible, setIsKeyVisible] = useState(false);
+const Settings = ({ onClose }: SettingsProps) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      navigate("/login");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -29,18 +45,14 @@ const Settings = ({ onClose, licenseKey }: SettingsProps) => {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-gray-900/50 p-4 rounded-lg">
-            <p className="text-sm text-gray-400 mb-2">License Key</p>
-            <div 
-              className={`font-mono text-sm transition-all duration-300 ${
-                isKeyVisible ? '' : 'blur-sm'
-              }`}
-              onMouseEnter={() => setIsKeyVisible(true)}
-              onMouseLeave={() => setIsKeyVisible(false)}
-            >
-              {licenseKey}
-            </div>
-          </div>
+          <Button 
+            variant="destructive" 
+            className="w-full"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
       </motion.div>
     </AnimatePresence>

@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import MessageList from "./chat/MessageList";
 import ChatInput from "./chat/ChatInput";
 import { UsageTracker, MAX_USES } from "./UsageTracker";
+import SubscriptionCheck from "./SubscriptionCheck";
 
 interface ChatInterfaceProps {
   option: string;
@@ -36,15 +37,6 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
         setIsLoading(false);
       }, 1000);
 
-      // Save chat to local storage
-      const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
-      savedChats.push({
-        option,
-        timestamp: new Date().toISOString(),
-        messages: [...messages, { role: 'user', content: userMessage }]
-      });
-      localStorage.setItem('savedChats', JSON.stringify(savedChats));
-
     } catch (error) {
       toast({
         title: "Error",
@@ -56,29 +48,31 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4 z-50"
-    >
-      <div className="container mx-auto max-w-4xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">{option}</h3>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
+    <SubscriptionCheck>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 20 }}
+        className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4 z-50"
+      >
+        <div className="container mx-auto max-w-4xl">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">{option}</h3>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
 
-        <MessageList messages={messages} isLoading={isLoading} />
-        
-        <ChatInput 
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          placeholder={`Enter your ${option.toLowerCase()} query...`}
-        />
-      </div>
-    </motion.div>
+          <MessageList messages={messages} isLoading={isLoading} />
+          
+          <ChatInput 
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+            placeholder={`Enter your ${option.toLowerCase()} query...`}
+          />
+        </div>
+      </motion.div>
+    </SubscriptionCheck>
   );
 };
 
