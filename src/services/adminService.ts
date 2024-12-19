@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface UserData {
   id: string;
+  user_id: string;  // Added this field as it comes from Supabase
   email: string;
   subscription: string;
   status: string;
@@ -16,7 +17,13 @@ export const fetchUsers = async (): Promise<UserData[]> => {
     .select('*');
   
   if (error) throw error;
-  return data || [];
+  
+  // Convert string dates to Date objects
+  return (data || []).map(user => ({
+    ...user,
+    created_at: new Date(user.created_at),
+    last_login: new Date(user.last_login)
+  }));
 };
 
 export const updateUserSubscription = async (userId: string, subscription: string) => {
@@ -44,7 +51,12 @@ export const getAnalytics = async () => {
   
   if (error) throw error;
   
-  const users = data || [];
+  const users = (data || []).map(user => ({
+    ...user,
+    created_at: new Date(user.created_at),
+    last_login: new Date(user.last_login)
+  }));
+
   return {
     totalUsers: users.length,
     premiumUsers: users.filter(u => u.subscription === 'Premium').length,
