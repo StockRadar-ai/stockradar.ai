@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Disallow: /admin-x9kp2m
