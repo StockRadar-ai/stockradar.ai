@@ -13,8 +13,22 @@ const SignUp = () => {
   const [authStatus, setAuthStatus] = useState<"idle" | "registering" | "success" | "error">("idle");
   const navigate = useNavigate();
 
+  const validatePassword = (password: string) => {
+    if (password.length < 6) {
+      return "Password must be at least 6 characters long";
+    }
+    return null;
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      toast.error(passwordError);
+      return;
+    }
+
     setIsLoading(true);
     setAuthStatus("registering");
 
@@ -120,14 +134,18 @@ const SignUp = () => {
                 className="bg-black/50 border-gray-800 focus:border-primary h-12"
                 required
               />
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-black/50 border-gray-800 focus:border-primary h-12"
-                required
-              />
+              <div className="space-y-1">
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-black/50 border-gray-800 focus:border-primary h-12"
+                  required
+                  minLength={6}
+                />
+                <p className="text-xs text-gray-400">Password must be at least 6 characters long</p>
+              </div>
             </div>
 
             <Button
