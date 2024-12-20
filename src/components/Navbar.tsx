@@ -43,14 +43,6 @@ const Navbar = () => {
         </div>
 
         <div className="md:flex items-center justify-end hidden">
-          <Link to="/login">
-            <Button
-              variant="ghost"
-              className="mr-4 hover:text-primary hover:bg-primary/10"
-            >
-              Login
-            </Button>
-          </Link>
           <Link to="/signup">
             <Button className="bg-primary hover:bg-primary/90">Start Now</Button>
           </Link>

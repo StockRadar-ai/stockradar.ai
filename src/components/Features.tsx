@@ -33,8 +33,11 @@ const Features = () => {
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8 }}
         >
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="text-primary/80 bg-gradient-to-r from-orange-200 to-orange-100 bg-clip-text text-transparent">Our Features</span>
+          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            Powerful Features
+            Powerful Functionality, Effortless Experience
           </h2>
           <p className="text-gray-400 text-center mb-16 max-w-2xl mx-auto">
             Leverage cutting-edge technology to make informed investment decisions

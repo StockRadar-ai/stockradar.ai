@@ -97,12 +97,11 @@ const Testimonials = () => {
 
   return (
     <section ref={containerRef} className="py-24 px-4 overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/5 to-transparent pointer-events-none" />
       
       <motion.div style={{ opacity }} className="container mx-auto relative z-10">
         <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-2 h-2 rounded-full bg-primary" />
-          <span className="text-primary">Our Community</span>
+          <span className="text-primary/80 bg-gradient-to-r from-orange-200 to-orange-100 bg-clip-text text-transparent">Our Community</span>
         </div>
 
         <h2 className="text-4xl md:text-5xl font-light text-center mb-16 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
