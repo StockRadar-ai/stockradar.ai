@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ChatInterface from "./ChatInterface";
+import { useState } from "react";
 
 interface SavedChatsProps {
   onClose: () => void;
@@ -8,6 +10,21 @@ interface SavedChatsProps {
 
 const SavedChats = ({ onClose }: SavedChatsProps) => {
   const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+  const [selectedChat, setSelectedChat] = useState<any>(null);
+
+  const handleChatClick = (chat: any) => {
+    setSelectedChat(chat);
+  };
+
+  if (selectedChat) {
+    return (
+      <ChatInterface
+        option={selectedChat.option}
+        onClose={() => setSelectedChat(null)}
+        initialMessages={selectedChat.messages}
+      />
+    );
+  }
 
   return (
     <motion.div
@@ -31,7 +48,8 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-4"
+              className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-4 cursor-pointer hover:bg-black/60 transition-colors"
+              onClick={() => handleChatClick(chat)}
             >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">{chat.option}</h3>
@@ -39,17 +57,9 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
                   {new Date(chat.timestamp).toLocaleDateString()}
                 </span>
               </div>
-              <div className="space-y-2">
-                {chat.messages.slice(0, 2).map((msg: any, msgIdx: number) => (
-                  <p key={msgIdx} className="text-sm text-gray-300">
-                    {msg.role === 'user' ? 'You: ' : 'AI: '}
-                    {msg.content}
-                  </p>
-                ))}
-                {chat.messages.length > 2 && (
-                  <p className="text-sm text-gray-400">...</p>
-                )}
-              </div>
+              <p className="text-sm text-gray-300">
+                Query: {chat.userQuery}
+              </p>
             </motion.div>
           ))}
           {savedChats.length === 0 && (

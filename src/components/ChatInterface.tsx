@@ -11,31 +11,41 @@ import { auth } from "@/services/firebase";
 interface ChatInterfaceProps {
   option: string;
   onClose: () => void;
+  initialMessages?: Array<{ role: 'user' | 'assistant', content: string }>;
 }
 
-const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
-  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
+const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps) => {
+  const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>(
+    initialMessages || []
+  );
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [displayedContent, setDisplayedContent] = useState("");
   const [fullContent, setFullContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const abortController = useRef<AbortController | null>(null);
+  const typingInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (fullContent) {
       let currentIndex = 0;
-      const interval = setInterval(() => {
+      typingInterval.current = setInterval(() => {
         if (currentIndex <= fullContent.length) {
           setDisplayedContent(fullContent.slice(0, currentIndex));
           currentIndex++;
         } else {
-          clearInterval(interval);
+          if (typingInterval.current) {
+            clearInterval(typingInterval.current);
+          }
           setIsGenerating(false);
         }
       }, 20);
 
-      return () => clearInterval(interval);
+      return () => {
+        if (typingInterval.current) {
+          clearInterval(typingInterval.current);
+        }
+      };
     }
   }, [fullContent]);
 
@@ -87,6 +97,7 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
       savedChats.push({
         option,
         timestamp: new Date().toISOString(),
+        userQuery: userMessage, // Store only the user's query without prefix
         messages: [...messages, { role: 'user', content: userMessage }, { role: 'assistant', content: aiResponse }]
       });
       localStorage.setItem('savedChats', JSON.stringify(savedChats));
@@ -95,6 +106,11 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
       if (error.name === 'AbortError') {
+        if (typingInterval.current) {
+          clearInterval(typingInterval.current);
+        }
+        setIsGenerating(false);
+        setDisplayedContent("");
         toast({
           title: "Generation stopped",
           description: "The AI response generation was stopped.",
@@ -116,7 +132,11 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   const handleStopGeneration = () => {
     if (abortController.current) {
       abortController.current.abort();
+      if (typingInterval.current) {
+        clearInterval(typingInterval.current);
+      }
       setIsGenerating(false);
+      setDisplayedContent("");
     }
   };
 
