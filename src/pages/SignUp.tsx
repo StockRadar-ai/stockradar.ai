@@ -5,11 +5,15 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { signUpUser, updateUserProfile } from "@/utils/auth";
+import { setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { auth } from "@/services/firebase";
+import { AuthFormInputs } from "@/components/auth/AuthFormInputs";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState<"idle" | "registering" | "success" | "error">("idle");
   const navigate = useNavigate();
@@ -39,6 +43,9 @@ const SignUp = () => {
     setAuthStatus("registering");
 
     try {
+      // Set persistence based on remember me checkbox
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      
       const { user, error } = await signUpUser(email, password);
       
       if (user && !error) {
@@ -144,26 +151,14 @@ const SignUp = () => {
                 className="bg-black/50 border-gray-800 focus:border-primary h-12"
                 required
               />
-              <Input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-black/50 border-gray-800 focus:border-primary h-12"
-                required
+              <AuthFormInputs
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                rememberMe={rememberMe}
+                setRememberMe={setRememberMe}
               />
-              <div className="space-y-1">
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-black/50 border-gray-800 focus:border-primary h-12"
-                  required
-                  minLength={6}
-                />
-                <p className="text-xs text-gray-400">Password must be at least 6 characters long</p>
-              </div>
             </div>
 
             <Button

@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { AuthFormInputs } from "./AuthFormInputs";
 import { signInUser } from "@/utils/auth";
+import { setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
+import { auth } from "@/services/firebase";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -13,6 +15,7 @@ interface LoginFormProps {
 export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState<"idle" | "authenticating" | "success" | "error">("idle");
 
@@ -22,6 +25,9 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
     setAuthStatus("authenticating");
 
     try {
+      // Set persistence based on remember me checkbox
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
+      
       const { user, error } = await signInUser(email, password);
       if (user && !error) {
         setAuthStatus("success");
@@ -88,6 +94,8 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
           setEmail={setEmail}
           password={password}
           setPassword={setPassword}
+          rememberMe={rememberMe}
+          setRememberMe={setRememberMe}
         />
 
         <Button
