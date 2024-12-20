@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AuthFormInputs } from "./AuthFormInputs";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -20,44 +21,42 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
     setIsLoading(true);
 
     try {
-      // First try to sign in
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (signInError && signInError.message.includes("Invalid login credentials")) {
-        // If login fails, try to sign up
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              email: email,
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          // Try to sign up if login fails
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                email: email,
+              }
             }
+          });
+
+          if (signUpError) throw signUpError;
+
+          if (signUpData.session) {
+            toast.success("Account created and logged in successfully!");
+            onSuccess();
+          } else {
+            toast.success("Account created! Please check your email for verification.");
           }
-        });
-
-        if (signUpError) {
-          throw signUpError;
-        }
-
-        if (signUpData.session) {
-          // If sign up creates a session immediately
-          toast.success("Account created and logged in successfully!");
-          onSuccess();
         } else {
-          toast.success("Account created! Please check your email for verification.");
+          throw error;
         }
-      } else if (signInError) {
-        throw signInError;
-      } else if (signInData.session) {
-        // Successful login
+      } else if (data.session) {
         toast.success("Successfully logged in!");
         onSuccess();
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to login");
+      console.error("Auth error:", error);
+      toast.error(error.message || "Failed to authenticate");
     } finally {
       setIsLoading(false);
     }
@@ -71,24 +70,12 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
       animate={{ opacity: 1 }}
       transition={{ delay: 0.2 }}
     >
-      <div className="space-y-4">
-        <Input
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="bg-black/50 border-gray-800 focus:border-primary h-12"
-          required
-        />
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="bg-black/50 border-gray-800 focus:border-primary h-12"
-          required
-        />
-      </div>
+      <AuthFormInputs
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+      />
 
       <Button
         type="submit"
