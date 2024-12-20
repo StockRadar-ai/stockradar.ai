@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 const Index = () => {
   return (
     <main className="min-h-screen bg-[#141414] overflow-hidden">
+      <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-transparent to-transparent pointer-events-none" />
       <Navbar />
       <Hero />
       <Features />

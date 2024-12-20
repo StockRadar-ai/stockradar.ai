@@ -13,7 +13,6 @@ const HowItWorks = () => {
 
   return (
     <section ref={ref} className="py-24 px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-transparent pointer-events-none" />
       <motion.div
         style={{ opacity, y }}
         className="container mx-auto relative z-10"
