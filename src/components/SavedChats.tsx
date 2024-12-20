@@ -23,9 +23,13 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
   const [chatToDelete, setChatToDelete] = useState<number | null>(null);
+  const [isSortedByFavorites, setIsSortedByFavorites] = useState(false);
   const [savedChats, setSavedChats] = useState(() => {
     const chats = JSON.parse(localStorage.getItem('savedChats') || '[]');
-    return chats.map((chat: any) => ({ ...chat, favorite: false }));
+    return chats.map((chat: any) => ({
+      ...chat,
+      favorite: chat.favorite || false
+    }));
   });
 
   const handleChatClick = (chat: any) => {
@@ -65,6 +69,18 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
     localStorage.setItem('savedChats', JSON.stringify(newChats));
   };
 
+  const toggleSort = () => {
+    setIsSortedByFavorites(!isSortedByFavorites);
+  };
+
+  const sortedChats = [...savedChats].sort((a, b) => {
+    if (isSortedByFavorites) {
+      if (a.favorite && !b.favorite) return -1;
+      if (!a.favorite && b.favorite) return 1;
+    }
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+
   if (selectedChat) {
     return (
       <ChatInterface
@@ -74,9 +90,6 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
       />
     );
   }
-
-  const favoriteChats = savedChats.filter(chat => chat.favorite);
-  const regularChats = savedChats.filter(chat => !chat.favorite);
 
   return (
     <motion.div
@@ -89,6 +102,14 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">All Queries</h2>
           <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline"
+              size="sm"
+              onClick={toggleSort}
+              className="mr-2"
+            >
+              {isSortedByFavorites ? "Sort by Date" : "Sort by Favorites"}
+            </Button>
             <Button 
               variant="destructive"
               size="sm"
@@ -104,48 +125,8 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
           </div>
         </div>
 
-        {favoriteChats.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4 text-primary">Favorites</h3>
-            <div className="space-y-4">
-              {favoriteChats.map((chat: any, idx: number) => (
-                <motion.div
-                  key={`favorite-${idx}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-4 relative"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-semibold">{chat.option}</h3>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-yellow-500"
-                        onClick={() => toggleFavorite(savedChats.indexOf(chat))}
-                      >
-                        <Star className="h-4 w-4 fill-current" />
-                      </Button>
-                      <span className="text-sm text-gray-400">
-                        {new Date(chat.timestamp).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div 
-                    className="text-sm text-gray-300 cursor-pointer"
-                    onClick={() => handleChatClick(chat)}
-                  >
-                    Query: {chat.userQuery}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="space-y-4">
-          {regularChats.map((chat: any, idx: number) => (
+          {sortedChats.map((chat: any, idx: number) => (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
@@ -159,15 +140,16 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => toggleFavorite(savedChats.indexOf(chat))}
+                    className={chat.favorite ? "text-yellow-500" : ""}
+                    onClick={() => toggleFavorite(idx)}
                   >
-                    <Star className="h-4 w-4" />
+                    <Star className={`h-4 w-4 ${chat.favorite ? "fill-current" : ""}`} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="text-red-500"
-                    onClick={() => handleDeleteChat(savedChats.indexOf(chat))}
+                    onClick={() => handleDeleteChat(idx)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -188,41 +170,41 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
             <p className="text-center text-gray-400">No saved queries yet</p>
           )}
         </div>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Query</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this query? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <AlertDialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete All Queries</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete all non-favorite queries? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteAll} className="bg-red-500 hover:bg-red-600">
+                Delete All
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
-
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Query</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this query? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete All Queries</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete all non-favorite queries? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteAll} className="bg-red-500 hover:bg-red-600">
-              Delete All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </motion.div>
   );
 };

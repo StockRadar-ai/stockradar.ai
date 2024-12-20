@@ -50,7 +50,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           }
           setIsGenerating(false);
         }
-      }, 5); // Reduced from 10ms to 5ms for double speed
+      }, 2.5); // Reduced from 5ms to 2.5ms for double speed
 
       return () => {
         if (typingInterval.current) {
@@ -194,16 +194,17 @@ Use extensive datapoints to ensure precise analysis. Provide a clear, concise, a
           />
         </div>
         
-        <div className="mt-auto">
-          <ChatInput 
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-            placeholder={getPlaceholder(option)}
-            isGenerating={isGenerating}
-            onStopGeneration={handleStopGeneration}
-            disabled={hasSubmitted} // Disable input after first submission
-          />
-        </div>
+        {!hasSubmitted && (
+          <div className="mt-auto">
+            <ChatInput 
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+              placeholder={getPlaceholder(option)}
+              isGenerating={isGenerating}
+              onStopGeneration={handleStopGeneration}
+            />
+          </div>
+        )}
       </div>
     </motion.div>
   );

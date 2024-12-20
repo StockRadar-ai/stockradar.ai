@@ -40,6 +40,18 @@ const Dashboard = () => {
     fetchUserName();
   }, []);
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate('/login');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const handleOptionClick = (option: string) => {
     setShowGreeting(false);
     setSelectedOption(option);
@@ -81,7 +93,7 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mb-48" // Increased from mb-32 to mb-48
+              className="text-center mb-64" // Increased from mb-48 to mb-64
             >
               <h1 className="text-3xl font-bold mb-2">
                 Hi there{userName ? <>, <span className="text-primary">{userName}</span></> : ""}!
