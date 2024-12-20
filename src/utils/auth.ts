@@ -1,5 +1,5 @@
 import { auth } from '@/services/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 export async function signInUser(email: string, password: string) {
   try {
@@ -22,17 +22,15 @@ export async function signUpUser(email: string, password: string) {
 }
 
 export async function updateUserProfile(userId: string, updates: { name?: string }) {
-  const { error } = await supabase
-    .from('user_analytics')
-    .upsert({ 
-      user_id: userId,
-      email: auth.currentUser?.email || '',
-      name: updates.name 
-    });
-
-  if (error) {
+  try {
+    if (auth.currentUser && updates.name) {
+      await updateProfile(auth.currentUser, {
+        displayName: updates.name
+      });
+    }
+    return { error: null };
+  } catch (error: any) {
     console.log("Profile update error:", error);
+    return { error };
   }
-
-  return { error };
 }
