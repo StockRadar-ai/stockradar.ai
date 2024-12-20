@@ -22,20 +22,14 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
 
     try {
       if (!isSigningUp) {
-        // Try to sign in first
-        const { session } = await signInUser(email, password);
-        if (session) {
+        const { error } = await signInUser(email, password);
+        if (!error) {
           toast.success("Successfully logged in!");
           onSuccess();
-          return;
         }
       } else {
-        // Try to sign up
-        const { session } = await signUpUser(email, password);
-        if (session) {
-          toast.success("Account created and logged in successfully!");
-          onSuccess();
-        } else {
+        const { error } = await signUpUser(email, password);
+        if (!error) {
           toast.success("Account created! Please check your email for verification.");
         }
       }
@@ -44,20 +38,7 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
       
       if (error.message.includes("Invalid login credentials") && !isSigningUp) {
         setIsSigningUp(true);
-        toast.info("No account found. Creating a new account...");
-        // Automatically try to sign up
-        try {
-          const { session } = await signUpUser(email, password);
-          if (session) {
-            toast.success("Account created and logged in successfully!");
-            onSuccess();
-          } else {
-            toast.success("Account created! Please check your email for verification.");
-          }
-        } catch (signUpError: any) {
-          console.error("Sign up error:", signUpError);
-          toast.error(signUpError.message || "Failed to create account");
-        }
+        toast.info("No account found. Would you like to create one?");
       } else {
         toast.error(error.message || "Failed to authenticate");
       }
