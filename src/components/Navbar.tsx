@@ -10,7 +10,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed w-full top-0 z-50 bg-black/60 backdrop-blur-lg border-b border-border/50 shadow-lg">
+      <nav className="fixed w-full top-0 z-50 bg-black/40 backdrop-blur-md border-b border-border/40 shadow-lg transition-all duration-300">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <img src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" alt="StockRadar Logo" className="h-8 w-8 object-contain" />

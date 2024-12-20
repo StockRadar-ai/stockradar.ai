@@ -1,10 +1,13 @@
 import { Check } from "lucide-react";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import PaymentDialog from "./PaymentDialog";
+import { motion, useInView } from "framer-motion";
 
 const Pricing = () => {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
   
   const features = [
     "High Quality Analysis",
@@ -15,16 +18,27 @@ const Pricing = () => {
   ];
 
   return (
-    <section className="py-24 px-4" id="pricing">
+    <section className="py-24 px-4" id="pricing" ref={ref}>
       <div className="container mx-auto">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-          Start Your Journey
-        </h2>
-        <p className="text-gray-400 text-center mb-16 max-w-2xl mx-auto">
-          Get access to professional stock analysis tools
-        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+            Start Your Journey
+          </h2>
+          <p className="text-gray-400 text-center mb-16 max-w-2xl mx-auto">
+            Get access to professional stock analysis tools
+          </p>
+        </motion.div>
 
-        <div className="max-w-md mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="max-w-md mx-auto"
+        >
           <div className="premium-card p-8 hover-lift">
             <h3 className="text-2xl font-bold mb-2">Premium Access</h3>
             <div className="flex items-baseline mb-6">
@@ -46,7 +60,7 @@ const Pricing = () => {
               Get Started
             </Button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <PaymentDialog 

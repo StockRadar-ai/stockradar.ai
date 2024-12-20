@@ -1,18 +1,26 @@
 import { Button } from "./ui/button";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 
 const Hero = () => {
   const navigate = useNavigate();
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   return (
-    <section className="pt-32 pb-20 px-4">
-      <div className="container mx-auto">
+    <section ref={ref} className="relative pt-32 pb-20 px-4 overflow-hidden">
+      <div className="container mx-auto relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <div className="inline-flex items-center bg-primary/10 rounded-full px-4 py-1.5 mb-8">
               <span className="w-2 h-2 rounded-full bg-[#FF4500] mr-2"></span>
@@ -42,9 +50,10 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, rotateY: -90 }}
+            style={{ y }}
+            initial={{ opacity: 0, rotateY: -15 }}
             animate={{ opacity: 1, rotateY: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" }}
             className="relative md:-right-20 lg:-right-32"
           >
             <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-[100px] animate-pulse" />
