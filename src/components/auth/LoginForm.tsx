@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AuthFormInputs } from "./AuthFormInputs";
+import { signInUser, signUpUser } from "@/utils/auth";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -21,42 +20,34 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          // Try to sign up if login fails
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                email: email,
-              }
-            }
-          });
-
-          if (signUpError) throw signUpError;
-
-          if (signUpData.session) {
+      // First try to sign in
+      const { session } = await signInUser(email, password);
+      if (session) {
+        toast.success("Successfully logged in!");
+        onSuccess();
+        return;
+      }
+    } catch (error: any) {
+      console.log("Sign in error:", error);
+      
+      // If login fails with invalid credentials, try to sign up
+      if (error.message.includes("Invalid login credentials")) {
+        try {
+          const { session } = await signUpUser(email, password);
+          if (session) {
             toast.success("Account created and logged in successfully!");
             onSuccess();
+            return;
           } else {
             toast.success("Account created! Please check your email for verification.");
           }
-        } else {
-          throw error;
+        } catch (signUpError: any) {
+          console.error("Sign up error:", signUpError);
+          toast.error(signUpError.message || "Failed to create account");
         }
-      } else if (data.session) {
-        toast.success("Successfully logged in!");
-        onSuccess();
+      } else {
+        toast.error(error.message || "Failed to authenticate");
       }
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      toast.error(error.message || "Failed to authenticate");
     } finally {
       setIsLoading(false);
     }
