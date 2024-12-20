@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
+import { AuthError } from "@supabase/supabase-js";
 
-export async function signInUser(email: string, password: string) {
+export async function signInUser(email: string, password: string): Promise<{ error: AuthError | null }> {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -8,13 +9,12 @@ export async function signInUser(email: string, password: string) {
 
   if (error) {
     console.log("Sign in error:", error);
-    throw error;
   }
 
-  return { session: data.session, user: data.user };
+  return { error };
 }
 
-export async function signUpUser(email: string, password: string) {
+export async function signUpUser(email: string, password: string): Promise<{ error: AuthError | null }> {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -25,8 +25,7 @@ export async function signUpUser(email: string, password: string) {
 
   if (error) {
     console.log("Sign up error:", error);
-    throw error;
   }
 
-  return { session: data.session, user: data.user };
+  return { error };
 }
