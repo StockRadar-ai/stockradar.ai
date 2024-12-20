@@ -31,7 +31,19 @@
     @apply border-border;
   }
   body {
-    @apply bg-[#141414] text-white;
+    @apply bg-[#141414] text-white antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth scrolling for modern browsers */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Improve text rendering */
+  h1, h2, h3, h4, h5, h6, p {
+    text-rendering: optimizeLegibility;
   }
 }

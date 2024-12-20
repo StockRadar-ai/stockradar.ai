@@ -19,14 +19,14 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-black/50 backdrop-blur-md" : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled ? "bg-black/30 backdrop-blur-md" : "bg-transparent"
       }`}
     >
       <nav className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
           <img 
-            src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" 
+            src="/lovable-uploads/512a904e-81b0-4fa4-b3ef-d7326f3b6993.png" 
             alt="StockRadar Logo" 
             className="w-8 h-8"
           />

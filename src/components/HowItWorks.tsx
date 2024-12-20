@@ -27,17 +27,17 @@ const HowItWorks = () => {
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="p-6 rounded-lg bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300">
+          <div className="p-8 rounded-[24px] bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center gap-4 mb-4">
               <span className="text-primary text-lg font-semibold">01</span>
-              <h3 className="text-xl">Login on Poe</h3>
+              <h3 className="text-xl">Create an Account</h3>
             </div>
             <p className="text-gray-400">
-              Access our bot through the safe and convenient login on Poe.
+              Sign up for a StockRadar account to access our powerful AI-driven stock analysis platform.
             </p>
           </div>
 
-          <div className="p-6 rounded-lg bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300">
+          <div className="p-8 rounded-[24px] bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center gap-4 mb-4">
               <span className="text-primary text-lg font-semibold">02</span>
               <h3 className="text-xl">Get ready to use our bot</h3>
@@ -47,7 +47,7 @@ const HowItWorks = () => {
             </p>
           </div>
 
-          <div className="p-6 rounded-lg bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300">
+          <div className="p-8 rounded-[24px] bg-black/40 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center gap-4 mb-4">
               <span className="text-primary text-lg font-semibold">03</span>
               <h3 className="text-xl">Get high-quality analysis</h3>
