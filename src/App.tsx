@@ -7,30 +7,22 @@ import Dashboard from "./pages/Dashboard";
 import Legal from "./pages/Legal";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
-import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/services/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { Toaster } from "sonner";
 
 function App() {
-  const [session, setSession] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Initial session:", session);
-      setSession(session);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("Auth state changed:", user ? "logged in" : "logged out");
+      setUser(user);
       setLoading(false);
     });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("Auth state changed:", session ? "logged in" : "logged out");
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, []);
 
   // Show loading state
@@ -46,15 +38,15 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route 
             path="/login" 
-            element={!session ? <Login /> : <Navigate to="/dashboard" replace />} 
+            element={!user ? <Login /> : <Navigate to="/dashboard" replace />} 
           />
           <Route 
             path="/signup" 
-            element={!session ? <SignUp /> : <Navigate to="/dashboard" replace />} 
+            element={!user ? <SignUp /> : <Navigate to="/dashboard" replace />} 
           />
           <Route 
             path="/dashboard" 
-            element={session ? <Dashboard /> : <Navigate to="/login" replace />} 
+            element={user ? <Dashboard /> : <Navigate to="/login" replace />} 
           />
           <Route path="/legal" element={<Legal />} />
           <Route path="/admin-x9kp2m" element={<AdminDashboard />} />
