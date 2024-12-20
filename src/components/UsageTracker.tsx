@@ -25,15 +25,35 @@ const UsageTracker = () => {
           .from('user_analytics')
           .select('subscription, requests')
           .eq('user_id', user.uid)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching user analytics:', error);
           return;
         }
 
-        setIsSubscribed(data?.subscription === 'Premium');
-        setUses(data?.requests || 0);
+        if (!data) {
+          // Create initial record if it doesn't exist
+          const { error: insertError } = await supabase
+            .from('user_analytics')
+            .insert({
+              user_id: user.uid,
+              email: user.email,
+              subscription: 'Basic',
+              requests: 0
+            });
+
+          if (insertError) {
+            console.error('Error inserting user analytics:', insertError);
+            return;
+          }
+          
+          setIsSubscribed(false);
+          setUses(0);
+        } else {
+          setIsSubscribed(data.subscription === 'Premium');
+          setUses(data.requests || 0);
+        }
       } catch (error) {
         console.error('Error checking subscription and usage:', error);
       }
