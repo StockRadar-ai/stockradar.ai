@@ -24,8 +24,13 @@ const Navbar = () => {
       }`}
     >
       <nav className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold text-white">
-          StockRadar
+        <Link to="/" className="flex items-center gap-3">
+          <img 
+            src="/lovable-uploads/c22f3ef4-7e97-4460-a322-3b100bcd6d45.png" 
+            alt="StockRadar Logo" 
+            className="w-8 h-8"
+          />
+          <span className="text-2xl font-bold text-white">StockRadar</span>
         </Link>
 
         <div className="hidden md:flex items-center justify-center flex-1 space-x-8">
