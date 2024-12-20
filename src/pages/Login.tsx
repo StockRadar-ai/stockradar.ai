@@ -1,20 +1,15 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [authStatus, setAuthStatus] = useState<"idle" | "authenticating" | "success" | "error">("idle");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -25,51 +20,8 @@ const Login = () => {
     checkSession();
   }, [navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setAuthStatus("authenticating");
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) throw error;
-
-      if (data.session) {
-        setAuthStatus("success");
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        toast.success("Successfully logged in!");
-        navigate('/dashboard');
-      }
-    } catch (error: any) {
-      setAuthStatus("error");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.error(error.message || "Failed to login");
-    } finally {
-      setIsLoading(false);
-      setAuthStatus("idle");
-    }
-  };
-
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) {
-      toast.error("Please enter your email address");
-      return;
-    }
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
-      
-      toast.success("Password reset email sent! Please check your inbox.");
-      setShowForgotPassword(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset email");
-    }
+  const handleLoginSuccess = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -85,36 +37,6 @@ const Login = () => {
           <span className="text-xl font-semibold text-white">StockRadar</span>
         </motion.a>
       </div>
-
-      <AnimatePresence>
-        {authStatus !== "idle" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="text-center"
-            >
-              {authStatus === "authenticating" && (
-                <div className="text-2xl text-white">Authenticating...</div>
-              )}
-              {authStatus === "success" && (
-                <div className="text-2xl text-green-500">Login Successful!</div>
-              )}
-              {authStatus === "error" && (
-                <div className="text-2xl text-red-500">Login Failed!</div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -136,62 +58,27 @@ const Login = () => {
             <p className="text-gray-400">Sign in to your account</p>
           </motion.div>
 
-          <motion.form 
-            onSubmit={showForgotPassword ? handleForgotPassword : handleLogin}
-            className="mt-8 space-y-6 bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+          {showForgotPassword ? (
+            <ForgotPasswordForm
+              onBack={() => setShowForgotPassword(false)}
+              email={email}
+              setEmail={setEmail}
+            />
+          ) : (
+            <LoginForm
+              onSuccess={handleLoginSuccess}
+              onForgotPassword={() => setShowForgotPassword(true)}
+            />
+          )}
+
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="text-sm text-center"
           >
-            <div className="space-y-4">
-              <Input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-black/50 border-gray-800 focus:border-primary h-12"
-                required
-              />
-              {!showForgotPassword && (
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-black/50 border-gray-800 focus:border-primary h-12"
-                  required
-                />
-              )}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary-hover h-12 transition-all duration-300"
-              disabled={isLoading}
-            >
-              {isLoading ? "Please wait..." : (showForgotPassword ? "Reset Password" : "Sign in")}
-            </Button>
-
-            <div className="text-center mt-4 space-y-2">
-              <motion.button
-                type="button"
-                onClick={() => setShowForgotPassword(!showForgotPassword)}
-                className="text-sm text-primary hover:text-primary/80 transition-colors"
-                whileHover={{ scale: 1.05 }}
-              >
-                {showForgotPassword ? "Back to Login" : "Forgot Password?"}
-              </motion.button>
-              
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="text-sm block"
-              >
-                <Link to="/signup" className="text-primary hover:text-primary/80 transition-colors">
-                  Don't have an account? Sign up
-                </Link>
-              </motion.div>
-            </div>
-          </motion.form>
+            <Link to="/signup" className="text-primary hover:text-primary/80 transition-colors">
+              Don't have an account? Sign up
+            </Link>
+          </motion.div>
         </div>
       </motion.div>
     </div>
