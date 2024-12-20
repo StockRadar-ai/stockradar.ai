@@ -1,38 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate('/dashboard');
-      }
-    };
-    checkSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        navigate('/dashboard');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  const handleLoginSuccess = () => {
-    navigate('/dashboard');
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#141414]">
@@ -76,7 +50,7 @@ const Login = () => {
             />
           ) : (
             <LoginForm
-              onSuccess={handleLoginSuccess}
+              onSuccess={() => {}} // Navigation is handled by App.tsx
               onForgotPassword={() => setShowForgotPassword(true)}
             />
           )}

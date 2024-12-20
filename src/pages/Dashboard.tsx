@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import DashboardOption from "@/components/DashboardOption";
 import ChatContainer from "@/components/chat/ChatContainer";
 import SavedChats from "@/components/SavedChats";
@@ -19,17 +18,16 @@ const Dashboard = () => {
   const [showSavedChats, setShowSavedChats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     const fetchUserName = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
         const { data, error } = await supabase
           .from('user_analytics')
           .select('name')
-          .eq('user_id', user.id)
+          .eq('user_id', currentUser.uid)
           .single();
 
         if (data?.name) {
@@ -40,18 +38,6 @@ const Dashboard = () => {
 
     fetchUserName();
   }, []);
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate('/login');
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
 
   const handleOptionClick = (option: string) => {
     setShowGreeting(false);
