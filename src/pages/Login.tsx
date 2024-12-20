@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
-import { loginWithEmailAndPassword, auth } from "@/services/firebase";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,27 +14,40 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/dashboard');
+      }
+    };
+    checkSession();
+  }, [navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setAuthStatus("authenticating");
 
     try {
-      const result = await loginWithEmailAndPassword(email, password);
-      if (result.success) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
         setAuthStatus("success");
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         toast.success("Successfully logged in!");
         navigate('/dashboard');
-      } else {
-        setAuthStatus("error");
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.error(result.error || "Failed to login");
       }
-    } catch (error) {
+    } catch (error: any) {
       setAuthStatus("error");
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.error("An error occurred during login");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.error(error.message || "Failed to login");
     } finally {
       setIsLoading(false);
       setAuthStatus("idle");
@@ -50,7 +62,9 @@ const Login = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      
       toast.success("Password reset email sent! Please check your inbox.");
       setShowForgotPassword(false);
     } catch (error: any) {
