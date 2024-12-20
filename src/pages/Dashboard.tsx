@@ -81,7 +81,7 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mb-32"
+              className="text-center mb-48" // Increased from mb-32 to mb-48
             >
               <h1 className="text-3xl font-bold mb-2">
                 Hi there{userName ? <>, <span className="text-primary">{userName}</span></> : ""}!
@@ -158,13 +158,13 @@ const Dashboard = () => {
           </Button>
         </motion.div>
 
-        {/* Disclaimer */}
+        {/* Updated Disclaimer */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center text-sm text-gray-500 mt-8"
         >
-          Not financial Advice. Always do your own research.
+          This is not financial advice. Always do your own research.
         </motion.p>
 
         {/* Saved Chats Modal */}

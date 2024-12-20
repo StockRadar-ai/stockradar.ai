@@ -50,7 +50,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           }
           setIsGenerating(false);
         }
-      }, 10);
+      }, 5); // Reduced from 10ms to 5ms for double speed
 
       return () => {
         if (typingInterval.current) {
@@ -63,7 +63,24 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
   const getPrefix = (option: string) => {
     const prefixes = {
       "Stocks of the Week": "Analyze the stock market for this week and identify the top-performing stocks based on the latest data from a fresh internet search. Include key performance indicators and reasons why these stocks stand out. Format the response professionally, starting with: 'These are the Top Stocks of the Week:'",
-      "Stock Analysis": "Perform a professional stock analysis based on the latest data from a fresh internet search. Focus on key metrics such as P/E ratio, revenue growth, and market trends. Provide a clear, concise, and professional explanation, starting with: 'Here is your Personalized Professional Stock Analysis:'",
+      "Stock Analysis": `Perform a professional stock analysis based on the latest data from a fresh internet search. Focus on key metrics such as P/E ratio, revenue growth, and market trends. Additionally, analyze and color-code the following criteria:
+
+ROIC%, Equity Growth%, EPS Growth%, Revenue Growth%, Free Cash Flow%:
+- 10% or higher: 🟢 Green
+- 8-10%: 🟡 Orange
+- Below 8%: 🔴 Red
+
+Debt Repayment Period:
+- 3 years or less: 🟢 Green
+- 3-4 years: 🟡 Orange
+- 4 years or more: 🔴 Red
+
+5-Year Performance:
+- Above 200%: 🟢 Green
+- 150-200%: 🟡 Orange
+- Below 150%: 🔴 Red
+
+Use extensive datapoints to ensure precise analysis. Provide a clear, concise, and professional explanation, starting with: 'Here is your Personalized Professional Stock Analysis:'`,
       "Chart Explanation": "Explain this stock chart in detail based on the latest data from a fresh internet search. Focus on trends, patterns, and key insights visible in the chart. Format the explanation professionally and begin with: 'Let me Explain this Chart to you!'",
       "Strategy Builder": "Develop a personalized stock trading strategy using insights from the latest data acquired through a fresh internet search. Provide actionable advice and clear steps, professionally formatted, beginning with: 'Here is your Personalized Strategy:'"
     };
