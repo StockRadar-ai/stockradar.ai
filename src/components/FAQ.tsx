@@ -1,27 +1,25 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Plus, Minus, X } from "lucide-react";
+
+interface FAQ {
+  question: string;
+  answer: string;
+}
 
 const FAQ = () => {
   const ref = useRef(null);
+  const [selectedFaq, setSelectedFaq] = useState<FAQ | null>(null);
+  
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
-  const y = useTransform(scrollYProgress, [0, 0.5], [50, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
+  const y = useTransform(scrollYProgress, [0, 0.2], [50, 0]);
 
-  const faqs = [
-    {
-      question: "Is StockRadar Financial Advice?",
-      answer: "Stock Radar offers analysis and insights solely for informational purposes. This does not constitute financial advice or a recommendation to buy or sell any assets. Please consult with a qualified financial advisor before making any investment decisions."
-    },
+  const faqs: FAQ[] = [
     {
       question: "What is StockRadar?",
       answer: "StockRadar is an AI-powered stock analysis platform that provides real-time market insights and investment recommendations based on comprehensive data analysis."
@@ -31,47 +29,97 @@ const FAQ = () => {
       answer: "StockRadar utilizes multiple reliable financial data sources, including market feeds, company financials, and economic indicators to provide comprehensive analysis."
     },
     {
+      question: "Is StockRadar Financial Advice?",
+      answer: "Stock Radar offers analysis and insights solely for informational purposes. This does not constitute financial advice or a recommendation to buy or sell any assets. Please consult with a qualified financial advisor before making any investment decisions."
+    },
+    {
       question: "How many requests can I make per month?",
       answer: "The number of requests depends on your subscription plan. Basic users get 5 requests per month, while premium users enjoy unlimited access."
     },
     {
-      question: "What is the difference between StockRadar and other stock analysis tools?",
-      answer: "StockRadar differentiates itself through its advanced AI algorithms, real-time analysis, and comprehensive market insights, providing more accurate and timely recommendations."
-    },
-    {
-      question: "What types of financial reports can I generate with StockRadar?",
+      question: "What types of financial reports can I generate?",
       answer: "StockRadar enables you to generate various reports including market analysis, stock performance predictions, risk assessments, and portfolio optimization recommendations."
     }
   ];
 
   return (
-    <section ref={ref} className="py-24 px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-transparent pointer-events-none" />
+    <section ref={ref} className="py-24 px-4 relative">
       <motion.div
         style={{ opacity, y }}
-        className="container mx-auto max-w-3xl relative z-10"
+        className="container mx-auto max-w-6xl relative"
       >
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-2 h-2 rounded-full bg-primary" />
-          <span className="text-primary">Frequently Asked Questions</span>
+        <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center justify-center gap-2 mb-4"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <span className="text-primary text-sm font-medium">Frequently Asked Questions</span>
+          </motion.div>
+
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl md:text-5xl font-semibold bg-gradient-to-b from-white to-gray-400 bg-clip-text text-transparent"
+          >
+            Questions & Answer
+          </motion.h2>
         </div>
 
-        <h2 className="text-4xl md:text-5xl font-light text-center mb-16 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-          Questions & Answer
-        </h2>
+        <div className="grid md:grid-cols-2 gap-12">
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group"
+              >
+                <button
+                  onClick={() => setSelectedFaq(selectedFaq?.question === faq.question ? null : faq)}
+                  className="w-full flex items-center justify-between p-4 text-left rounded-lg bg-black/20 backdrop-blur-sm border border-gray-800 hover:border-primary/50 transition-all duration-300"
+                >
+                  <span className="text-gray-200 group-hover:text-white transition-colors">
+                    {faq.question}
+                  </span>
+                  {selectedFaq?.question === faq.question ? (
+                    <Minus className="w-4 h-4 text-primary" />
+                  ) : (
+                    <Plus className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+                  )}
+                </button>
+              </motion.div>
+            ))}
+          </div>
 
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border-gray-800">
-              <AccordionTrigger className="text-left hover:text-primary transition-colors">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-400">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+          <div className="relative">
+            <AnimatePresence mode="wait">
+              {selectedFaq && (
+                <motion.div
+                  key={selectedFaq.question}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="sticky top-24 p-6 rounded-2xl bg-black/40 backdrop-blur-md border border-gray-800"
+                >
+                  <button
+                    onClick={() => setSelectedFaq(null)}
+                    className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-800/50 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <h3 className="text-xl font-medium text-white mb-4">{selectedFaq.question}</h3>
+                  <p className="text-gray-400 leading-relaxed">{selectedFaq.answer}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
       </motion.div>
     </section>
   );

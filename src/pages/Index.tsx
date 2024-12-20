@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 const Index = () => {
   return (
     <main className="min-h-screen bg-[#141414] overflow-hidden">
-      <div className="fixed inset-0 bg-gradient-to-b from-black/10 via-transparent to-transparent pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-[#141414] to-[#141414] opacity-50 pointer-events-none" />
       <Navbar />
       <Hero />
       <Features />
