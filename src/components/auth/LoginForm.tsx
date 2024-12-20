@@ -22,26 +22,28 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
 
     try {
       if (!isSigningUp) {
-        const { error } = await signInUser(email, password);
-        if (!error) {
+        const { user, error } = await signInUser(email, password);
+        if (user && !error) {
           toast.success("Successfully logged in!");
           onSuccess();
+        } else if (error?.code === "auth/user-not-found") {
+          setIsSigningUp(true);
+          toast.info("No account found. Would you like to create one?");
+        } else {
+          toast.error(error?.message || "Failed to sign in");
         }
       } else {
-        const { error } = await signUpUser(email, password);
-        if (!error) {
-          toast.success("Account created! Please check your email for verification.");
+        const { user, error } = await signUpUser(email, password);
+        if (user && !error) {
+          toast.success("Account created successfully!");
+          onSuccess();
+        } else {
+          toast.error(error?.message || "Failed to create account");
         }
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
-      
-      if (error.message.includes("Invalid login credentials") && !isSigningUp) {
-        setIsSigningUp(true);
-        toast.info("No account found. Would you like to create one?");
-      } else {
-        toast.error(error.message || "Failed to authenticate");
-      }
+      toast.error(error.message || "Failed to authenticate");
     } finally {
       setIsLoading(false);
     }

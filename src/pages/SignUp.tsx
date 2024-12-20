@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { signUpUser, updateUserProfile } from "@/utils/auth";
-import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -40,25 +39,20 @@ const SignUp = () => {
     setAuthStatus("registering");
 
     try {
-      const { error: signUpError } = await signUpUser(email, password);
+      const { user, error } = await signUpUser(email, password);
       
-      if (!signUpError) {
-        // Get the user after signup
-        const { data: { session } } = await supabase.auth.getSession();
+      if (user && !error) {
+        // Update user profile with name
+        await updateUserProfile(user.uid, { name: name.trim() });
         
-        if (session?.user) {
-          // Update user profile with name
-          await updateUserProfile(session.user.id, { name: name.trim() });
-          
-          setAuthStatus("success");
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          toast.success("Account created successfully! Please check your email for verification.");
-          navigate('/login');
-        }
+        setAuthStatus("success");
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast.success("Account created successfully!");
+        navigate('/dashboard');
       } else {
         setAuthStatus("error");
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.error(signUpError.message || "Failed to create account");
+        toast.error(error?.message || "Failed to create account");
       }
     } catch (error: any) {
       setAuthStatus("error");

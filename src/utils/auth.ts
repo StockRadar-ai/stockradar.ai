@@ -1,33 +1,24 @@
-import { supabase } from "@/integrations/supabase/client";
-import { AuthError } from "@supabase/supabase-js";
+import { auth } from '@/services/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
-export async function signInUser(email: string, password: string): Promise<{ error: AuthError | null }> {
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
+export async function signInUser(email: string, password: string) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return { user: userCredential.user, error: null };
+  } catch (error: any) {
     console.log("Sign in error:", error);
+    return { user: null, error };
   }
-
-  return { error };
 }
 
-export async function signUpUser(email: string, password: string): Promise<{ error: AuthError | null }> {
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: window.location.origin,
-    },
-  });
-
-  if (error) {
+export async function signUpUser(email: string, password: string) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return { user: userCredential.user, error: null };
+  } catch (error: any) {
     console.log("Sign up error:", error);
+    return { user: null, error };
   }
-
-  return { error };
 }
 
 export async function updateUserProfile(userId: string, updates: { name?: string }) {
@@ -35,6 +26,7 @@ export async function updateUserProfile(userId: string, updates: { name?: string
     .from('user_analytics')
     .upsert({ 
       user_id: userId,
+      email: auth.currentUser?.email || '',
       name: updates.name 
     });
 
