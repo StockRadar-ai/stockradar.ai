@@ -33,10 +33,14 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
   });
 
   const handleChatClick = (chat: any) => {
-    setSelectedChat(chat);
+    setSelectedChat({
+      ...chat,
+      isExistingChat: true // Add flag to indicate this is a saved chat
+    });
   };
 
-  const handleDeleteChat = (index: number) => {
+  const handleDeleteChat = (index: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent chat selection when deleting
     setChatToDelete(index);
     setShowDeleteDialog(true);
   };
@@ -62,9 +66,13 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
     setShowDeleteAllDialog(false);
   };
 
-  const toggleFavorite = (index: number) => {
+  const toggleFavorite = (index: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent chat selection when toggling favorite
     const newChats = [...savedChats];
-    newChats[index].favorite = !newChats[index].favorite;
+    newChats[index] = {
+      ...newChats[index],
+      favorite: !newChats[index].favorite
+    };
     setSavedChats(newChats);
     localStorage.setItem('savedChats', JSON.stringify(newChats));
   };
@@ -87,6 +95,7 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
         option={selectedChat.option}
         onClose={() => setSelectedChat(null)}
         initialMessages={selectedChat.messages}
+        isExistingChat={selectedChat.isExistingChat}
       />
     );
   }
@@ -132,7 +141,8 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-4 relative"
+              className="bg-black/40 backdrop-blur-lg border border-gray-800/50 rounded-lg p-4 relative cursor-pointer"
+              onClick={() => handleChatClick(chat)}
             >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">{chat.option}</h3>
@@ -141,7 +151,7 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
                     variant="ghost"
                     size="icon"
                     className={chat.favorite ? "text-yellow-500" : ""}
-                    onClick={() => toggleFavorite(idx)}
+                    onClick={(e) => toggleFavorite(idx, e)}
                   >
                     <Star className={`h-4 w-4 ${chat.favorite ? "fill-current" : ""}`} />
                   </Button>
@@ -149,7 +159,7 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
                     variant="ghost"
                     size="icon"
                     className="text-red-500"
-                    onClick={() => handleDeleteChat(idx)}
+                    onClick={(e) => handleDeleteChat(idx, e)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -158,10 +168,7 @@ const SavedChats = ({ onClose }: SavedChatsProps) => {
                   </span>
                 </div>
               </div>
-              <div 
-                className="text-sm text-gray-300 cursor-pointer"
-                onClick={() => handleChatClick(chat)}
-              >
+              <div className="text-sm text-gray-300">
                 Query: {chat.userQuery}
               </div>
             </motion.div>

@@ -11,9 +11,10 @@ interface ChatInterfaceProps {
   option: string;
   onClose: () => void;
   initialMessages?: Array<{ role: 'user' | 'assistant', content: string }>;
+  isExistingChat?: boolean; // Add this prop
 }
 
-const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps) => {
+const ChatInterface = ({ option, onClose, initialMessages, isExistingChat }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>(
     initialMessages || []
   );
@@ -87,9 +88,8 @@ Use extensive datapoints to ensure precise analysis. Provide a clear, concise, a
   };
 
   useEffect(() => {
-    // If there are initial messages and it's the Stocks of the Week option,
-    // automatically trigger the API call
-    if (initialMessages && option === "Stocks of the Week") {
+    // Only trigger automatic API call for new "Stocks of the Week" chats
+    if (initialMessages && option === "Stocks of the Week" && !isExistingChat) {
       handleSubmit("Show me the stocks of the week");
     }
   }, []);
