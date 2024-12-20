@@ -21,37 +21,41 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
 
     try {
       // First try to sign in
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (signInError && signInError.message.includes("Invalid login credentials")) {
         // If login fails, try to sign up
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              email: email,
+            }
+          }
         });
 
         if (signUpError) {
           throw signUpError;
         }
 
-        // If sign up succeeds, try logging in again
-        const { error: finalLoginError } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (finalLoginError) {
-          throw finalLoginError;
+        if (signUpData.session) {
+          // If sign up creates a session immediately
+          toast.success("Account created and logged in successfully!");
+          onSuccess();
+        } else {
+          toast.success("Account created! Please check your email for verification.");
         }
       } else if (signInError) {
         throw signInError;
+      } else if (signInData.session) {
+        // Successful login
+        toast.success("Successfully logged in!");
+        onSuccess();
       }
-
-      toast.success("Successfully logged in!");
-      onSuccess();
     } catch (error: any) {
       toast.error(error.message || "Failed to login");
     } finally {
