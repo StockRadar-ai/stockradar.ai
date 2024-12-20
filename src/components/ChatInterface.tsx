@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ArrowRight, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import MessageList from "./chat/MessageList";
@@ -19,6 +19,8 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [displayedContent, setDisplayedContent] = useState("");
   const [fullContent, setFullContent] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const abortController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (fullContent) {
@@ -29,50 +31,103 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
           currentIndex++;
         } else {
           clearInterval(interval);
+          setIsGenerating(false);
         }
-      }, 20); // Adjust speed here
+      }, 20);
 
       return () => clearInterval(interval);
     }
   }, [fullContent]);
 
+  const getPrefix = (option: string) => {
+    const prefixes = {
+      "Stocks of the Week": "Analyze the stock market for this week and identify the top-performing stocks based on the latest data from a fresh internet search. Include key performance indicators and reasons why these stocks stand out. Format the response professionally, starting with: 'These are the Top Stocks of the Week:'",
+      "Stock Analysis": "Perform a professional stock analysis based on the latest data from a fresh internet search. Focus on key metrics such as P/E ratio, revenue growth, and market trends. Provide a clear, concise, and professional explanation, starting with: 'Here is your Personalized Professional Stock Analysis:'",
+      "Chart Explanation": "Explain this stock chart in detail based on the latest data from a fresh internet search. Focus on trends, patterns, and key insights visible in the chart. Format the explanation professionally and begin with: 'Let me Explain this Chart to you!'",
+      "Strategy Builder": "Develop a personalized stock trading strategy using insights from the latest data acquired through a fresh internet search. Provide actionable advice and clear steps, professionally formatted, beginning with: 'Here is your Personalized Strategy:'"
+    };
+    return prefixes[option as keyof typeof prefixes] || "";
+  };
+
   const handleSubmit = async (userMessage: string) => {
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
+    setIsGenerating(true);
 
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("Not authenticated");
 
-      const response = await supabase.functions.invoke('analyze-stock', {
-        body: { option, query: userMessage }
+      // Create new abort controller for this request
+      abortController.current = new AbortController();
+
+      const prefix = getPrefix(option);
+      const fullPrompt = `${prefix} ${userMessage}`;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer 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',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'mixtral-8x7b-instruct',
+          messages: [{ role: 'user', content: fullPrompt }]
+        }),
+        signal: abortController.current.signal
       });
 
-      if (response.error) throw response.error;
+      if (!response.ok) throw new Error('API request failed');
 
-      const aiResponse = response.data.choices[0].message.content;
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+      
+      // Save chat to local storage
+      const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+      savedChats.push({
+        option,
+        timestamp: new Date().toISOString(),
+        messages: [...messages, { role: 'user', content: userMessage }, { role: 'assistant', content: aiResponse }]
+      });
+      localStorage.setItem('savedChats', JSON.stringify(savedChats));
+
       setFullContent(aiResponse);
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to get response. Please try again.",
-        variant: "destructive"
-      });
+      if (error.name === 'AbortError') {
+        toast({
+          title: "Generation stopped",
+          description: "The AI response generation was stopped.",
+          variant: "default"
+        });
+      } else {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to get response. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleStopGeneration = () => {
+    if (abortController.current) {
+      abortController.current.abort();
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4 z-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50"
     >
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto h-full flex flex-col p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">{option}</h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -80,17 +135,23 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
           </Button>
         </div>
 
-        <MessageList 
-          messages={messages} 
-          isLoading={isLoading} 
-          displayedContent={displayedContent}
-        />
+        <div className="flex-grow overflow-y-auto mb-4">
+          <MessageList 
+            messages={messages} 
+            isLoading={isLoading} 
+            displayedContent={displayedContent}
+          />
+        </div>
         
-        <ChatInput 
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-          placeholder={`Enter your ${option.toLowerCase()} query...`}
-        />
+        <div className="mt-auto">
+          <ChatInput 
+            onSubmit={handleSubmit}
+            isLoading={isLoading}
+            placeholder={`Enter your ${option.toLowerCase()} query...`}
+            isGenerating={isGenerating}
+            onStopGeneration={handleStopGeneration}
+          />
+        </div>
       </div>
     </motion.div>
   );

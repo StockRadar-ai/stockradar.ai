@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useRef, useEffect } from "react";
+import ResponseFormatter from "./ResponseFormatter";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -24,7 +25,7 @@ const MessageList = ({ messages, isLoading, displayedContent }: MessageListProps
   }, [messages, displayedContent]);
 
   return (
-    <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
+    <div className="space-y-4 mb-4">
       {messages.map((msg, idx) => (
         <motion.div
           key={idx}
@@ -37,9 +38,15 @@ const MessageList = ({ messages, isLoading, displayedContent }: MessageListProps
               : 'bg-gray-800/50 mr-auto max-w-[80%]'
           }`}
         >
-          {msg.role === 'assistant' && idx === messages.length - 1
-            ? displayedContent || msg.content
-            : msg.content}
+          {msg.role === 'assistant' && idx === messages.length - 1 ? (
+            <ResponseFormatter content={displayedContent || msg.content} />
+          ) : (
+            msg.role === 'assistant' ? (
+              <ResponseFormatter content={msg.content} />
+            ) : (
+              msg.content
+            )
+          )}
         </motion.div>
       ))}
       {isLoading && (
