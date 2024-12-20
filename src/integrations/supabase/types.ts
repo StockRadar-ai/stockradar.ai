@@ -15,6 +15,7 @@ export type Database = {
           email: string
           id: string
           last_login: string | null
+          name: string | null
           requests: number | null
           status: string | null
           subscription: string | null
@@ -25,6 +26,7 @@ export type Database = {
           email: string
           id?: string
           last_login?: string | null
+          name?: string | null
           requests?: number | null
           status?: string | null
           subscription?: string | null
@@ -35,6 +37,7 @@ export type Database = {
           email?: string
           id?: string
           last_login?: string | null
+          name?: string | null
           requests?: number | null
           status?: string | null
           subscription?: string | null

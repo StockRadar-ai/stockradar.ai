@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, MessageSquare } from "lucide-react";
+import { Settings, MessageSquare, Star, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import DashboardOption from "@/components/DashboardOption";
@@ -9,6 +9,7 @@ import SavedChats from "@/components/SavedChats";
 import SettingsModal from "@/components/Settings";
 import { useToast } from "@/components/ui/use-toast";
 import { UsageTracker } from "@/components/UsageTracker";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const [showGreeting, setShowGreeting] = useState(true);
@@ -16,15 +17,33 @@ const Dashboard = () => {
   const [showChat, setShowChat] = useState(false);
   const [showSavedChats, setShowSavedChats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('user_analytics')
+          .select('name')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data?.name) {
+          setUserName(data.name);
+        }
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   const handleOptionClick = (option: string) => {
     setShowGreeting(false);
     setSelectedOption(option);
-    if (option !== "Stocks of the Week") {
-      setShowChat(true);
-    }
+    setShowChat(true);
   };
 
   return (
@@ -62,9 +81,11 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mb-16"
+              className="text-center mb-32"
             >
-              <h1 className="text-3xl font-bold mb-2">Hi there!</h1>
+              <h1 className="text-3xl font-bold mb-2">
+                Hi there{userName ? <>, <span className="text-primary">{userName}</span></> : ""}!
+              </h1>
               <p className="text-gray-400">Can I help you with anything?</p>
             </motion.div>
           )}
@@ -77,7 +98,7 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-16"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
             >
               <DashboardOption
                 title="Stocks of the Week"
@@ -121,7 +142,7 @@ const Dashboard = () => {
           )}
         </AnimatePresence>
 
-        {/* Saved Chats Button */}
+        {/* All Queries Button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -133,7 +154,7 @@ const Dashboard = () => {
             onClick={() => setShowSavedChats(true)}
           >
             <MessageSquare className="mr-2 h-4 w-4" />
-            Chats
+            All Queries
           </Button>
         </motion.div>
 

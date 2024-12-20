@@ -5,10 +5,12 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { signUpWithEmailAndPassword } from "@/services/firebase";
+import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [authStatus, setAuthStatus] = useState<"idle" | "registering" | "success" | "error">("idle");
   const navigate = useNavigate();
@@ -29,12 +31,27 @@ const SignUp = () => {
       return;
     }
 
+    if (!name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
     setIsLoading(true);
     setAuthStatus("registering");
 
     try {
       const result = await signUpWithEmailAndPassword(email, password);
       if (result.success) {
+        // Update user analytics with name
+        const { error } = await supabase
+          .from('user_analytics')
+          .update({ name: name.trim() })
+          .eq('user_id', result.user.uid);
+
+        if (error) {
+          console.error('Error updating user name:', error);
+        }
+
         setAuthStatus("success");
         await new Promise(resolve => setTimeout(resolve, 1500));
         toast.success("Account created successfully!");
@@ -126,6 +143,14 @@ const SignUp = () => {
             transition={{ delay: 0.2 }}
           >
             <div className="space-y-4">
+              <Input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="bg-black/50 border-gray-800 focus:border-primary h-12"
+                required
+              />
               <Input
                 type="email"
                 placeholder="Email address"
