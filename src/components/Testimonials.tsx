@@ -14,17 +14,17 @@ const Testimonials = () => {
 
   const testimonials = [
     {
-      avatar: "/lovable-uploads/659ff64b-5dc5-41c7-83ed-e7777f5233cc.png",
+      avatar: "/lovable-uploads/c31fc29c-c890-4fa5-9f3a-c0b3d0add0e6.png",
       quote: "StockRadar has been a game-changer for my portfolio. It's like having a personal financial advisor 24/7.",
       rating: 5
     },
     {
-      avatar: "/lovable-uploads/659ff64b-5dc5-41c7-83ed-e7777f5233cc.png",
+      avatar: "/lovable-uploads/c31fc29c-c890-4fa5-9f3a-c0b3d0add0e6.png",
       quote: "With StockRadar's insights, I've made smarter trades with confidence. It's like a safety net for my decisions.",
       rating: 5
     },
     {
-      avatar: "/lovable-uploads/659ff64b-5dc5-41c7-83ed-e7777f5233cc.png",
+      avatar: "/lovable-uploads/c31fc29c-c890-4fa5-9f3a-c0b3d0add0e6.png",
       quote: "I never imagined stock analysis could be so easy and accurate. StockRadar's recommendations have significantly boosted my returns.",
       rating: 5
     }

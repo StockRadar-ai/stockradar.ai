@@ -33,6 +33,14 @@ const FAQ = () => {
     {
       question: "How many requests can I make per month?",
       answer: "The number of requests depends on your subscription plan. Basic users get 5 requests per month, while premium users enjoy unlimited access."
+    },
+    {
+      question: "What is the difference between StockRadar and other stock analysis tools?",
+      answer: "StockRadar differentiates itself through its advanced AI algorithms, real-time analysis, and comprehensive market insights, providing more accurate and timely recommendations."
+    },
+    {
+      question: "What types of financial reports can I generate with StockRadar?",
+      answer: "StockRadar enables you to generate various reports including market analysis, stock performance predictions, risk assessments, and portfolio optimization recommendations."
     }
   ];
 
@@ -64,13 +72,6 @@ const FAQ = () => {
             </AccordionItem>
           ))}
         </Accordion>
-
-        <div className="text-center mt-12">
-          <p className="text-gray-400 mb-4">Can't find what you're looking for?</p>
-          <button className="bg-black/40 hover:bg-black/60 border border-gray-800 px-6 py-2 rounded-full text-sm transition-all duration-300">
-            Contact Us
-          </button>
-        </div>
       </motion.div>
     </section>
   );
