@@ -21,39 +21,39 @@ const UsageTracker = () => {
           return;
         }
 
-        const { data, error } = await supabase
+        // First check if record exists
+        let { data, error } = await supabase
           .from('user_analytics')
           .select('subscription, requests')
           .eq('user_id', user.uid)
-          .maybeSingle();
+          .single();
 
-        if (error) {
-          console.error('Error fetching user analytics:', error);
-          return;
-        }
-
-        if (!data) {
-          // Create initial record if it doesn't exist
-          const { error: insertError } = await supabase
+        if (error && error.code === 'PGRST116') {
+          // Record doesn't exist, create it
+          const { data: insertData, error: insertError } = await supabase
             .from('user_analytics')
             .insert({
               user_id: user.uid,
               email: user.email,
               subscription: 'Basic',
               requests: 0
-            });
+            })
+            .select()
+            .single();
 
           if (insertError) {
             console.error('Error inserting user analytics:', insertError);
             return;
           }
-          
-          setIsSubscribed(false);
-          setUses(0);
-        } else {
-          setIsSubscribed(data.subscription === 'Premium');
-          setUses(data.requests || 0);
+
+          data = insertData;
+        } else if (error) {
+          console.error('Error fetching user analytics:', error);
+          return;
         }
+
+        setIsSubscribed(data?.subscription === 'Premium');
+        setUses(data?.requests || 0);
       } catch (error) {
         console.error('Error checking subscription and usage:', error);
       }

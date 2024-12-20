@@ -23,37 +23,37 @@ const SubscriptionCheck = ({ children }: SubscriptionCheckProps) => {
         }
 
         // First check if record exists
-        const { data: existingData, error: fetchError } = await supabase
+        let { data, error } = await supabase
           .from('user_analytics')
           .select('subscription')
           .eq('user_id', user.uid)
-          .maybeSingle();
+          .single();
 
-        if (fetchError) {
-          console.error('Error fetching user analytics:', fetchError);
-          return;
-        }
-
-        // If no record exists, create one
-        if (!existingData) {
-          const { error: insertError } = await supabase
+        if (error && error.code === 'PGRST116') {
+          // Record doesn't exist, create it
+          const { data: insertData, error: insertError } = await supabase
             .from('user_analytics')
             .insert({
               user_id: user.uid,
               email: user.email,
               subscription: 'Basic',
               requests: 0
-            });
+            })
+            .select()
+            .single();
 
           if (insertError) {
             console.error('Error inserting user analytics:', insertError);
             return;
           }
-          
-          setIsSubscribed(false);
-        } else {
-          setIsSubscribed(existingData.subscription === 'Premium');
+
+          data = insertData;
+        } else if (error) {
+          console.error('Error fetching user analytics:', error);
+          return;
         }
+
+        setIsSubscribed(data?.subscription === 'Premium');
       } catch (error) {
         console.error('Error checking subscription:', error);
         toast({
