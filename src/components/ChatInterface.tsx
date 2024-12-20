@@ -71,7 +71,7 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'mixtral-8x7b-instruct',
+          model: 'llama-3.1-sonar-small-128k-online',
           messages: [{ role: 'user', content: fullPrompt }]
         }),
         signal: abortController.current.signal
