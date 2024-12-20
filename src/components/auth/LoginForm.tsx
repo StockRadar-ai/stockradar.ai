@@ -14,30 +14,43 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // First try to sign in
-      const { session } = await signInUser(email, password);
-      if (session) {
-        toast.success("Successfully logged in!");
-        onSuccess();
-        return;
+      if (!isSigningUp) {
+        // Try to sign in first
+        const { session } = await signInUser(email, password);
+        if (session) {
+          toast.success("Successfully logged in!");
+          onSuccess();
+          return;
+        }
+      } else {
+        // Try to sign up
+        const { session } = await signUpUser(email, password);
+        if (session) {
+          toast.success("Account created and logged in successfully!");
+          onSuccess();
+        } else {
+          toast.success("Account created! Please check your email for verification.");
+        }
       }
     } catch (error: any) {
-      console.log("Sign in error:", error);
+      console.error("Authentication error:", error);
       
-      // If login fails with invalid credentials, try to sign up
-      if (error.message.includes("Invalid login credentials")) {
+      if (error.message.includes("Invalid login credentials") && !isSigningUp) {
+        setIsSigningUp(true);
+        toast.info("No account found. Creating a new account...");
+        // Automatically try to sign up
         try {
           const { session } = await signUpUser(email, password);
           if (session) {
             toast.success("Account created and logged in successfully!");
             onSuccess();
-            return;
           } else {
             toast.success("Account created! Please check your email for verification.");
           }
@@ -73,7 +86,7 @@ export const LoginForm = ({ onSuccess, onForgotPassword }: LoginFormProps) => {
         className="w-full bg-primary hover:bg-primary-hover h-12 transition-all duration-300"
         disabled={isLoading}
       >
-        {isLoading ? "Please wait..." : "Sign in"}
+        {isLoading ? "Please wait..." : (isSigningUp ? "Sign up" : "Sign in")}
       </Button>
 
       <div className="text-center mt-4">
