@@ -9,14 +9,22 @@ interface ChatInputProps {
   placeholder: string;
   isGenerating: boolean;
   onStopGeneration: () => void;
+  disabled?: boolean;
 }
 
-const ChatInput = ({ onSubmit, isLoading, placeholder, isGenerating, onStopGeneration }: ChatInputProps) => {
+const ChatInput = ({ 
+  onSubmit, 
+  isLoading, 
+  placeholder, 
+  isGenerating, 
+  onStopGeneration,
+  disabled 
+}: ChatInputProps) => {
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || disabled) return;
     onSubmit(input.trim());
     setInput("");
   };
@@ -28,12 +36,12 @@ const ChatInput = ({ onSubmit, isLoading, placeholder, isGenerating, onStopGener
         onChange={(e) => setInput(e.target.value)}
         placeholder={placeholder}
         className="bg-black/40 border-gray-800"
-        disabled={isGenerating}
+        disabled={disabled || isGenerating}
       />
       <Button 
         type={isGenerating ? "button" : "submit"}
         onClick={isGenerating ? onStopGeneration : undefined}
-        disabled={isLoading && !isGenerating}
+        disabled={(isLoading && !isGenerating) || disabled}
         className="rounded-full aspect-square p-2"
       >
         {isGenerating ? (

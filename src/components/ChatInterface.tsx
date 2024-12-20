@@ -23,8 +23,19 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
   const [displayedContent, setDisplayedContent] = useState("");
   const [fullContent, setFullContent] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const abortController = useRef<AbortController | null>(null);
   const typingInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const getPlaceholder = (option: string) => {
+    const placeholders = {
+      "Stocks of the Week": "Press enter to get this week's top stock picks...",
+      "Stock Analysis": "Enter a stock symbol or company name to analyze...",
+      "Chart Explanation": "Enter a stock symbol to explain its chart patterns...",
+      "Strategy Builder": "Describe your trading goals for a personalized strategy..."
+    };
+    return placeholders[option as keyof typeof placeholders] || "Enter your query...";
+  };
 
   useEffect(() => {
     if (fullContent) {
@@ -39,7 +50,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           }
           setIsGenerating(false);
         }
-      }, 10); // Reduced from 20ms to 10ms for faster typing
+      }, 10);
 
       return () => {
         if (typingInterval.current) {
@@ -60,15 +71,17 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
   };
 
   const handleSubmit = async (userMessage: string) => {
+    if (hasSubmitted) return; // Prevent multiple submissions
+    
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
     setIsGenerating(true);
+    setHasSubmitted(true); // Mark as submitted after first query
 
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("Not authenticated");
 
-      // Create new abort controller for this request
       abortController.current = new AbortController();
 
       const prefix = getPrefix(option);
@@ -97,7 +110,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
       savedChats.push({
         option,
         timestamp: new Date().toISOString(),
-        userQuery: userMessage, // Store only the user's query without prefix
+        userQuery: userMessage,
         messages: [...messages, { role: 'user', content: userMessage }, { role: 'assistant', content: aiResponse }]
       });
       localStorage.setItem('savedChats', JSON.stringify(savedChats));
@@ -123,6 +136,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           description: "Failed to get response. Please try again.",
           variant: "destructive"
         });
+        setHasSubmitted(false); // Reset on error to allow retry
       }
     } finally {
       setIsLoading(false);
@@ -167,9 +181,10 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           <ChatInput 
             onSubmit={handleSubmit}
             isLoading={isLoading}
-            placeholder={`Enter your ${option.toLowerCase()} query...`}
+            placeholder={getPlaceholder(option)}
             isGenerating={isGenerating}
             onStopGeneration={handleStopGeneration}
+            disabled={hasSubmitted} // Disable input after first submission
           />
         </div>
       </div>
