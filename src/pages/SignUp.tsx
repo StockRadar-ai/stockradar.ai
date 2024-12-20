@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
-import { signUpWithEmailAndPassword } from "@/services/firebase";
+import { signUpUser, updateUserProfile } from "@/utils/auth";
 import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
@@ -40,28 +40,27 @@ const SignUp = () => {
     setAuthStatus("registering");
 
     try {
-      const result = await signUpWithEmailAndPassword(email, password);
-      if (result.success) {
-        // Update user analytics with name
-        const { error } = await supabase
-          .from('user_analytics')
-          .update({ name: name.trim() })
-          .eq('user_id', result.user.uid);
-
-        if (error) {
-          console.error('Error updating user name:', error);
+      const { error: signUpError } = await signUpUser(email, password);
+      
+      if (!signUpError) {
+        // Get the user after signup
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // Update user profile with name
+          await updateUserProfile(session.user.id, { name: name.trim() });
+          
+          setAuthStatus("success");
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          toast.success("Account created successfully! Please check your email for verification.");
+          navigate('/login');
         }
-
-        setAuthStatus("success");
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.success("Account created successfully!");
-        navigate('/dashboard');
       } else {
         setAuthStatus("error");
         await new Promise(resolve => setTimeout(resolve, 1500));
-        toast.error(result.error || "Failed to create account");
+        toast.error(signUpError.message || "Failed to create account");
       }
-    } catch (error) {
+    } catch (error: any) {
       setAuthStatus("error");
       await new Promise(resolve => setTimeout(resolve, 1500));
       toast.error("An error occurred during registration");
