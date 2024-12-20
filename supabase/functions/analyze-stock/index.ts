@@ -44,6 +44,7 @@ serve(async (req) => {
           }
         ],
         temperature: 0.2,
+        top_p: 0.9,
         max_tokens: 1000,
         return_images: false,
         return_related_questions: false,

@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import MessageList from "./chat/MessageList";
 import ChatInput from "./chat/ChatInput";
-import { UsageTracker } from "./UsageTracker";
-import SubscriptionCheck from "./SubscriptionCheck";
 import { supabase } from "@/integrations/supabase/client";
 import { auth } from "@/services/firebase";
 
@@ -21,7 +19,6 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [displayedContent, setDisplayedContent] = useState("");
   const [fullContent, setFullContent] = useState("");
-  const usageTrackerRef = useRef<{ incrementUse: () => boolean }>();
 
   useEffect(() => {
     if (fullContent) {
@@ -40,15 +37,6 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   }, [fullContent]);
 
   const handleSubmit = async (userMessage: string) => {
-    if (!usageTrackerRef.current?.incrementUse()) {
-      toast({
-        title: "Usage limit reached",
-        description: "Please upgrade your subscription to continue.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
@@ -78,35 +66,33 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   };
 
   return (
-    <SubscriptionCheck>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4 z-50"
-      >
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold">{option}</h3>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          <MessageList 
-            messages={messages} 
-            isLoading={isLoading} 
-            displayedContent={displayedContent}
-          />
-          
-          <ChatInput 
-            onSubmit={handleSubmit}
-            isLoading={isLoading}
-            placeholder={`Enter your ${option.toLowerCase()} query...`}
-          />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-lg border-t border-gray-800/50 p-4 z-50"
+    >
+      <div className="container mx-auto max-w-4xl">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">{option}</h3>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
         </div>
-      </motion.div>
-    </SubscriptionCheck>
+
+        <MessageList 
+          messages={messages} 
+          isLoading={isLoading} 
+          displayedContent={displayedContent}
+        />
+        
+        <ChatInput 
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+          placeholder={`Enter your ${option.toLowerCase()} query...`}
+        />
+      </div>
+    </motion.div>
   );
 };
 
