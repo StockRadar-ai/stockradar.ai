@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Settings, MessageSquare, Star, Trash2, X } from "lucide-react";
+import { Settings, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import DashboardOption from "@/components/DashboardOption";
@@ -8,8 +8,8 @@ import ChatInterface from "@/components/ChatInterface";
 import SavedChats from "@/components/SavedChats";
 import SettingsModal from "@/components/Settings";
 import { useToast } from "@/components/ui/use-toast";
-import { UsageTracker } from "@/components/UsageTracker";
 import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/services/firebase";
 
 const Dashboard = () => {
   const [showGreeting, setShowGreeting] = useState(true);
@@ -52,10 +52,59 @@ const Dashboard = () => {
     };
   }, [navigate]);
 
-  const handleOptionClick = (option: string) => {
+  const handleOptionClick = async (option: string) => {
     setShowGreeting(false);
     setSelectedOption(option);
-    setShowChat(true);
+
+    if (option === "Stocks of the Week") {
+      try {
+        const user = auth.currentUser;
+        if (!user) throw new Error("Not authenticated");
+
+        const prefix = "Analyze the stock market for this week and identify the top-performing stocks based on the latest data from a fresh internet search. Include key performance indicators and reasons why these stocks stand out. Format the response professionally, starting with: 'These are the Top Stocks of the Week:'";
+
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer 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',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-sonar-small-128k-online',
+            messages: [{ role: 'user', content: prefix }]
+          }),
+        });
+
+        if (!response.ok) throw new Error('API request failed');
+
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
+        
+        // Save chat to local storage
+        const savedChats = JSON.parse(localStorage.getItem('savedChats') || '[]');
+        savedChats.push({
+          option,
+          timestamp: new Date().toISOString(),
+          userQuery: "Stocks of the Week",
+          messages: [
+            { role: 'user', content: "Show me the stocks of the week" },
+            { role: 'assistant', content: aiResponse }
+          ]
+        });
+        localStorage.setItem('savedChats', JSON.stringify(savedChats));
+
+        setShowChat(true);
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to get stocks of the week. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      setShowChat(true);
+    }
   };
 
   return (
@@ -82,9 +131,6 @@ const Dashboard = () => {
         </div>
       </motion.div>
 
-      {/* Usage Tracker */}
-      <UsageTracker />
-
       {/* Main Content */}
       <div className="container mx-auto px-4 pt-32 pb-16">
         <AnimatePresence>
@@ -93,7 +139,7 @@ const Dashboard = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="text-center mb-64" // Increased from mb-48 to mb-64
+              className="text-center mb-64"
             >
               <h1 className="text-3xl font-bold mb-2">
                 Hi there{userName ? <>, <span className="text-primary">{userName}</span></> : ""}!
@@ -150,6 +196,13 @@ const Dashboard = () => {
                 setSelectedOption(null);
                 setShowGreeting(true);
               }}
+              initialMessages={
+                selectedOption === "Stocks of the Week" 
+                  ? [
+                      { role: 'user', content: "Show me the stocks of the week" }
+                    ]
+                  : undefined
+              }
             />
           )}
         </AnimatePresence>

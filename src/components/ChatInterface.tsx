@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import MessageList from "./chat/MessageList";
 import ChatInput from "./chat/ChatInput";
-import { supabase } from "@/integrations/supabase/client";
 import { auth } from "@/services/firebase";
 
 interface ChatInterfaceProps {
@@ -50,7 +49,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           }
           setIsGenerating(false);
         }
-      }, 2.5); // Reduced from 5ms to 2.5ms for double speed
+      }, 2.5);
 
       return () => {
         if (typingInterval.current) {
@@ -87,13 +86,21 @@ Use extensive datapoints to ensure precise analysis. Provide a clear, concise, a
     return prefixes[option as keyof typeof prefixes] || "";
   };
 
+  useEffect(() => {
+    // If there are initial messages and it's the Stocks of the Week option,
+    // automatically trigger the API call
+    if (initialMessages && option === "Stocks of the Week") {
+      handleSubmit("Show me the stocks of the week");
+    }
+  }, []);
+
   const handleSubmit = async (userMessage: string) => {
-    if (hasSubmitted) return; // Prevent multiple submissions
+    if (hasSubmitted) return;
     
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
     setIsGenerating(true);
-    setHasSubmitted(true); // Mark as submitted after first query
+    setHasSubmitted(true);
 
     try {
       const user = auth.currentUser;
@@ -153,7 +160,7 @@ Use extensive datapoints to ensure precise analysis. Provide a clear, concise, a
           description: "Failed to get response. Please try again.",
           variant: "destructive"
         });
-        setHasSubmitted(false); // Reset on error to allow retry
+        setHasSubmitted(false);
       }
     } finally {
       setIsLoading(false);
@@ -194,7 +201,7 @@ Use extensive datapoints to ensure precise analysis. Provide a clear, concise, a
           />
         </div>
         
-        {!hasSubmitted && (
+        {!hasSubmitted && option !== "Stocks of the Week" && (
           <div className="mt-auto">
             <ChatInput 
               onSubmit={handleSubmit}
