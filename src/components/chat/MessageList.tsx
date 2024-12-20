@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useRef, useEffect } from "react";
 import ResponseFormatter from "./ResponseFormatter";
+import { Loader2 } from "lucide-react";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -53,13 +54,9 @@ const MessageList = ({ messages, isLoading, displayedContent }: MessageListProps
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-gray-800/50 p-3 rounded-lg mr-auto max-w-[80%]"
+          className="bg-gray-800/50 p-4 rounded-lg mr-auto max-w-[80%] flex items-center justify-center"
         >
-          <div className="flex space-x-2">
-            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-100" />
-            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce delay-200" />
-          </div>
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </motion.div>
       )}
       <div ref={messagesEndRef} />

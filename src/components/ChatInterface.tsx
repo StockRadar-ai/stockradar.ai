@@ -39,7 +39,7 @@ const ChatInterface = ({ option, onClose, initialMessages }: ChatInterfaceProps)
           }
           setIsGenerating(false);
         }
-      }, 20);
+      }, 10); // Reduced from 20ms to 10ms for faster typing
 
       return () => {
         if (typingInterval.current) {

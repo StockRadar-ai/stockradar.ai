@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 interface ResponseFormatterProps {
   content: string;
@@ -6,16 +7,28 @@ interface ResponseFormatterProps {
 
 const ResponseFormatter = ({ content }: ResponseFormatterProps) => {
   const formatLine = (line: string, index: number) => {
-    // Handle headings
-    if (line.startsWith("###")) {
+    // Handle headings with # or ##
+    if (line.match(/^#+/)) {
+      const level = line.match(/^#+/)[0].length;
+      const text = line
+        .replace(/^#+/, "") // Remove heading markers
+        .replace(/\*\*/g, "") // Remove bold markers
+        .trim();
+      
+      const fontSize = {
+        1: "text-2xl",
+        2: "text-xl",
+        3: "text-lg"
+      }[level] || "text-base";
+
       return (
         <motion.h3
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           key={index}
-          className="text-xl font-semibold text-primary my-5"
+          className={`${fontSize} font-bold text-primary my-5`}
         >
-          {line.replace(/^###/, "").trim()}
+          {text}
         </motion.h3>
       );
     }
@@ -30,13 +43,27 @@ const ResponseFormatter = ({ content }: ResponseFormatterProps) => {
           className="ml-6 my-2 flex items-start"
         >
           <span className="text-primary mr-2">•</span>
-          {line.replace(/^[-*]/, "").trim()}
+          {line.replace(/^[-*]/, "").replace(/\*\*/g, "").trim()}
         </motion.li>
       );
     }
     
+    // Handle bold text
+    if (line.includes("**")) {
+      return (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          key={index}
+          className="font-bold my-3"
+        >
+          {line.replace(/\*\*/g, "").trim()}
+        </motion.p>
+      );
+    }
+    
     // Handle italic text
-    if (line.match(/(\*\*\*.*\*\*\*|_.*_)/)) {
+    if (line.match(/(_.*_)/)) {
       return (
         <motion.p
           initial={{ opacity: 0 }}
@@ -44,7 +71,7 @@ const ResponseFormatter = ({ content }: ResponseFormatterProps) => {
           key={index}
           className="italic my-3"
         >
-          {line.replace(/^\*{3}|^\_|\*{3}$|\_$/, "").trim()}
+          {line.replace(/^\_|\_$/g, "").trim()}
         </motion.p>
       );
     }
