@@ -9,9 +9,10 @@ interface Message {
 interface MessageListProps {
   messages: Message[];
   isLoading: boolean;
+  displayedContent: string;
 }
 
-const MessageList = ({ messages, isLoading }: MessageListProps) => {
+const MessageList = ({ messages, isLoading, displayedContent }: MessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -20,7 +21,7 @@ const MessageList = ({ messages, isLoading }: MessageListProps) => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, displayedContent]);
 
   return (
     <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
@@ -36,7 +37,9 @@ const MessageList = ({ messages, isLoading }: MessageListProps) => {
               : 'bg-gray-800/50 mr-auto max-w-[80%]'
           }`}
         >
-          {msg.content}
+          {msg.role === 'assistant' && idx === messages.length - 1
+            ? displayedContent || msg.content
+            : msg.content}
         </motion.div>
       ))}
       {isLoading && (

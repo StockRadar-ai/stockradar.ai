@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -7,6 +7,8 @@ import MessageList from "./chat/MessageList";
 import ChatInput from "./chat/ChatInput";
 import { UsageTracker, MAX_USES } from "./UsageTracker";
 import SubscriptionCheck from "./SubscriptionCheck";
+import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/services/firebase";
 
 interface ChatInterfaceProps {
   option: string;
@@ -17,10 +19,33 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [displayedContent, setDisplayedContent] = useState("");
+  const [fullContent, setFullContent] = useState("");
   const usageTrackerRef = useRef<{ incrementUse: () => boolean }>();
+
+  useEffect(() => {
+    if (fullContent) {
+      let currentIndex = 0;
+      const interval = setInterval(() => {
+        if (currentIndex <= fullContent.length) {
+          setDisplayedContent(fullContent.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 20); // Adjust speed here
+
+      return () => clearInterval(interval);
+    }
+  }, [fullContent]);
 
   const handleSubmit = async (userMessage: string) => {
     if (!usageTrackerRef.current?.incrementUse()) {
+      toast({
+        title: "Usage limit reached",
+        description: "Please upgrade your subscription to continue.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -28,21 +53,26 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     try {
-      // Here we would integrate with Perplexity API
-      setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: `This is a placeholder response for ${option}. In the real implementation, this would come from the Perplexity API.` 
-        }]);
-        setIsLoading(false);
-      }, 1000);
+      const user = auth.currentUser;
+      if (!user) throw new Error("Not authenticated");
 
+      const response = await supabase.functions.invoke('analyze-stock', {
+        body: { option, query: userMessage }
+      });
+
+      if (response.error) throw response.error;
+
+      const aiResponse = response.data.choices[0].message.content;
+      setFullContent(aiResponse);
+      setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error",
         description: "Failed to get response. Please try again.",
         variant: "destructive"
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -63,7 +93,11 @@ const ChatInterface = ({ option, onClose }: ChatInterfaceProps) => {
             </Button>
           </div>
 
-          <MessageList messages={messages} isLoading={isLoading} />
+          <MessageList 
+            messages={messages} 
+            isLoading={isLoading} 
+            displayedContent={displayedContent}
+          />
           
           <ChatInput 
             onSubmit={handleSubmit}
